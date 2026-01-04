@@ -12,6 +12,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AIGCCanvas: typeof import('./src/components/AIGCCanvas.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
@@ -21,6 +22,7 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const AIGCCanvas: typeof import('./src/components/AIGCCanvas.vue')['default']
   const ElButton: typeof import('element-plus/es')['ElButton']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']
