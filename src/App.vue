@@ -550,7 +550,7 @@ const initializeDashedElement = () => {
   const rect = canvasRef.value.getBoundingClientRect()
   const centerX = rect.width / 2
   const centerY = rect.height / 2
-  const size = 200
+  const size = 600 // 3倍于原来的200px
 
   // 创建默认的1:1虚线框
   const dashedElement: CanvasElement = {
@@ -594,7 +594,21 @@ const handleGlobalClick = (event: MouseEvent) => {
 // 拖拽开始处理
 const onDragStart = (event: DragEvent, asset: Asset) => {
   if (event.dataTransfer) {
-    event.dataTransfer.setData('asset', JSON.stringify(asset))
+    // 获取鼠标在缩略图上的相对位置
+    const target = event.target as HTMLElement
+    const rect = target.getBoundingClientRect()
+    const relativeX = event.clientX - rect.left
+    const relativeY = event.clientY - rect.top
+
+    // 将资产信息和相对位置一起存储
+    const dragData = {
+      asset,
+      relativeX,
+      relativeY,
+      thumbnailWidth: rect.width,
+      thumbnailHeight: rect.height,
+    }
+    event.dataTransfer.setData('asset', JSON.stringify(dragData))
   }
 }
 
@@ -810,12 +824,13 @@ const onResizeEnd = () => {
 const onDrop = (event: DragEvent) => {
   if (!canvasRef.value || !event.dataTransfer) return
 
-  const assetStr = event.dataTransfer.getData('asset')
-  if (assetStr) {
-    const asset = JSON.parse(assetStr) as Asset
+  const dragDataStr = event.dataTransfer.getData('asset')
+  if (dragDataStr) {
+    const dragData = JSON.parse(dragDataStr)
+    const asset = dragData.asset as Asset
     const rect = canvasRef.value.getBoundingClientRect()
-    const left = event.clientX - rect.left
-    const top = event.clientY - rect.top
+    const dropX = event.clientX - rect.left
+    const dropY = event.clientY - rect.top
 
     // 创建临时图片对象获取原始宽高比
     const img = new Image()
@@ -824,6 +839,18 @@ const onDrop = (event: DragEvent) => {
       // 设置初始宽度为200，高度根据宽高比计算
       const initialWidth = 200
       const initialHeight = initialWidth / aspectRatio
+
+      // 计算缩放比例
+      const scaleX = initialWidth / dragData.thumbnailWidth
+      const scaleY = initialHeight / dragData.thumbnailHeight
+
+      // 计算鼠标在大图上的相对位置
+      const scaledRelativeX = dragData.relativeX * scaleX
+      const scaledRelativeY = dragData.relativeY * scaleY
+
+      // 计算大图的左上角位置
+      const left = dropX - scaledRelativeX
+      const top = dropY - scaledRelativeY
 
       // 添加图片元素到画布
       addCanvasElement({
