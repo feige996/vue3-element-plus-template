@@ -55,6 +55,12 @@
         >
           {{ editMode ? '编辑' : '浏览' }}
         </button>
+        <button
+          class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors ml-2"
+          @click="clearCanvas"
+        >
+          清空画布
+        </button>
       </div>
       <!-- 画布区域 -->
       <div class="flex-1 bg-gray-200 p-4 overflow-hidden">
@@ -1004,6 +1010,18 @@ const deleteElement = () => {
 
   // 清空选中状态
   selectedElementId.value = null
+}
+
+// 清空画布
+const clearCanvas = () => {
+  // 清空画布元素列表
+  canvasElements.value = []
+  // 清空选中状态
+  selectedElementId.value = null
+  // 重置主虚线框引用
+  mainDashedElement.value = null
+  // 重新初始化虚线框
+  initializeDashedElement()
 }
 
 // 获取元素样式
