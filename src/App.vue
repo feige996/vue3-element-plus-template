@@ -22,24 +22,27 @@
     <!-- 中间画布区域 -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- 工具栏 -->
-      <div class="h-12 bg-white border-b border-gray-200 flex items-center px-4 space-x-2">
+      <div
+        ref="toolbarRef"
+        class="h-12 bg-white border-b border-gray-200 flex items-center px-4 space-x-2"
+      >
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click.stop="activeTool = activeTool === 'text' ? null : 'text'"
+          @click="activeTool = activeTool === 'text' ? null : 'text'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'text' }"
         >
           文本框
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click.stop="activeTool = activeTool === 'rect' ? null : 'rect'"
+          @click="activeTool = activeTool === 'rect' ? null : 'rect'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'rect' }"
         >
           矩形框
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click.stop="activeTool = activeTool === 'dashed' ? null : 'dashed'"
+          @click="activeTool = activeTool === 'dashed' ? null : 'dashed'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'dashed' }"
         >
           虚线框
@@ -58,7 +61,7 @@
         </select>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click.stop="activeTool = activeTool === 'number' ? null : 'number'"
+          @click="activeTool = activeTool === 'number' ? null : 'number'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'number' }"
         >
           数字标
@@ -66,7 +69,7 @@
         <div class="w-px h-6 bg-gray-300 mx-2"></div>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click.stop="editMode = !editMode"
+          @click="editMode = !editMode"
           :class="{ 'ring-2 ring-blue-400': editMode }"
         >
           {{ editMode ? '编辑' : '浏览' }}
@@ -461,6 +464,9 @@ const tempDashedRect = ref<{ left: number; top: number; width: number; height: n
   null,
 )
 
+// 工具栏引用
+const toolbarRef = ref<HTMLElement | null>(null)
+
 // 组件挂载时添加全局点击事件监听器
 onMounted(() => {
   document.addEventListener('click', handleGlobalClick)
@@ -475,6 +481,12 @@ onUnmounted(() => {
 const handleGlobalClick = (event: MouseEvent) => {
   // 如果没有激活的工具，不处理
   if (!activeTool.value) return
+
+  // 检查点击是否发生在工具栏区域
+  if (toolbarRef.value && toolbarRef.value.contains(event.target as Node)) {
+    // 点击发生在工具栏内，不取消工具激活
+    return
+  }
 
   // 如果画布存在，检查点击是否发生在画布以外
   if (canvasRef.value) {
