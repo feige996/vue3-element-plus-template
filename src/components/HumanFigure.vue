@@ -24,11 +24,17 @@
         :style="getPartStyle('left-arm')"
         @mousedown.stop="onJointMouseDown($event, 'left-arm')"
       >
-        <div class="arm-part upper-arm"></div>
+        <div
+          class="arm-part upper-arm"
+          :style="{
+            transform: `rotate(${leftArmRotation}deg)`,
+            transformOrigin: 'top center',
+          }"
+        ></div>
         <div
           class="arm-part lower-arm"
           :style="{
-            transform: `rotate(${leftArmRotation}deg)`,
+            transform: `rotate(${leftLowerArmRotation}deg)`,
             transformOrigin: 'top center',
           }"
         ></div>
@@ -40,11 +46,17 @@
         :style="getPartStyle('right-arm')"
         @mousedown.stop="onJointMouseDown($event, 'right-arm')"
       >
-        <div class="arm-part upper-arm"></div>
+        <div
+          class="arm-part upper-arm"
+          :style="{
+            transform: `rotate(${rightArmRotation}deg)`,
+            transformOrigin: 'top center',
+          }"
+        ></div>
         <div
           class="arm-part lower-arm"
           :style="{
-            transform: `rotate(${rightArmRotation}deg)`,
+            transform: `rotate(${rightLowerArmRotation}deg)`,
             transformOrigin: 'top center',
           }"
         ></div>
@@ -56,11 +68,17 @@
         :style="getPartStyle('left-leg')"
         @mousedown.stop="onJointMouseDown($event, 'left-leg')"
       >
-        <div class="leg-part upper-leg"></div>
+        <div
+          class="leg-part upper-leg"
+          :style="{
+            transform: `rotate(${leftLegRotation}deg)`,
+            transformOrigin: 'top center',
+          }"
+        ></div>
         <div
           class="leg-part lower-leg"
           :style="{
-            transform: `rotate(${leftLegRotation}deg)`,
+            transform: `rotate(${leftLowerLegRotation}deg)`,
             transformOrigin: 'top center',
           }"
         ></div>
@@ -72,11 +90,17 @@
         :style="getPartStyle('right-leg')"
         @mousedown.stop="onJointMouseDown($event, 'right-leg')"
       >
-        <div class="leg-part upper-leg"></div>
+        <div
+          class="leg-part upper-leg"
+          :style="{
+            transform: `rotate(${rightLegRotation}deg)`,
+            transformOrigin: 'top center',
+          }"
+        ></div>
         <div
           class="leg-part lower-leg"
           :style="{
-            transform: `rotate(${rightLegRotation}deg)`,
+            transform: `rotate(${rightLowerLegRotation}deg)`,
             transformOrigin: 'top center',
           }"
         ></div>
@@ -127,46 +151,74 @@ const emit = defineEmits<{
 // 手臂和腿部旋转角度
 const leftArmRotation = ref(0)
 const rightArmRotation = ref(0)
+const leftLowerArmRotation = ref(0)
+const rightLowerArmRotation = ref(0)
 const leftLegRotation = ref(0)
 const rightLegRotation = ref(0)
+const leftLowerLegRotation = ref(0)
+const rightLowerLegRotation = ref(0)
 
 // 预设姿势定义
 const poseDefinitions = {
   standing: {
     leftArmRotation: 0,
     rightArmRotation: 0,
+    leftLowerArmRotation: 0,
+    rightLowerArmRotation: 0,
     leftLegRotation: 0,
     rightLegRotation: 0,
+    leftLowerLegRotation: 0,
+    rightLowerLegRotation: 0,
   },
   waving: {
     leftArmRotation: 0,
     rightArmRotation: 45,
+    leftLowerArmRotation: 0,
+    rightLowerArmRotation: 90,
     leftLegRotation: 0,
     rightLegRotation: 0,
+    leftLowerLegRotation: 0,
+    rightLowerLegRotation: 0,
   },
   sitting: {
     leftArmRotation: 15,
     rightArmRotation: 15,
+    leftLowerArmRotation: 0,
+    rightLowerArmRotation: 0,
     leftLegRotation: -90,
     rightLegRotation: -90,
+    leftLowerLegRotation: 90,
+    rightLowerLegRotation: 90,
   },
   thinking: {
     leftArmRotation: 45,
     rightArmRotation: 0,
+    leftLowerArmRotation: -45,
+    rightLowerArmRotation: 0,
     leftLegRotation: 0,
     rightLegRotation: 0,
+    leftLowerLegRotation: 0,
+    rightLowerLegRotation: 0,
   },
   running: {
     leftArmRotation: 60,
     rightArmRotation: -60,
+    leftLowerArmRotation: -60,
+    rightLowerArmRotation: 60,
     leftLegRotation: -45,
     rightLegRotation: 45,
+    leftLowerLegRotation: 45,
+    rightLowerLegRotation: -45,
   },
   jumping: {
     leftArmRotation: -30,
     rightArmRotation: -30,
+    leftLowerArmRotation: -30,
+    rightLowerArmRotation: -30,
     leftLegRotation: 45,
     rightLegRotation: 45,
+    leftLowerLegRotation: -45,
+    rightLowerLegRotation: -45,
   },
 }
 
@@ -177,8 +229,12 @@ watch(
       poseDefinitions[newPose as keyof typeof poseDefinitions] || poseDefinitions.standing
     leftArmRotation.value = pose.leftArmRotation
     rightArmRotation.value = pose.rightArmRotation
+    leftLowerArmRotation.value = pose.leftLowerArmRotation
+    rightLowerArmRotation.value = pose.rightLowerArmRotation
     leftLegRotation.value = pose.leftLegRotation
     rightLegRotation.value = pose.rightLegRotation
+    leftLowerLegRotation.value = pose.leftLowerLegRotation
+    rightLowerLegRotation.value = pose.rightLowerLegRotation
   },
   { immediate: true },
 )
@@ -387,15 +443,23 @@ const onMouseUp = () => {
 
 .upper-arm,
 .upper-leg {
-  height: 50%;
+  height: 60%;
   border-radius: 8px;
 }
 
 .lower-arm,
 .lower-leg {
-  height: 50%;
-  top: 50%;
+  height: 60%;
+  top: 40%;
   border-radius: 8px;
+}
+
+.arm {
+  height: 45% !important;
+}
+
+.leg {
+  height: 45% !important;
 }
 
 .joint-control {
