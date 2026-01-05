@@ -402,7 +402,7 @@
 
 <style scoped>
 /* contenteditable元素的placeholder样式 */
-:deep([contenteditable=true]):empty:before {
+:deep([contenteditable='true']):empty:before {
   content: attr(placeholder);
   color: #9ca3af;
   pointer-events: none;
@@ -516,18 +516,31 @@ const tempRect = ref<{ left: number; top: number; width: number; height: number 
 // 工具栏引用
 const toolbarRef = ref<HTMLElement | null>(null)
 
-// 组件挂载时添加全局点击事件监听器
+// 组件挂载时添加全局事件监听器
 onMounted(() => {
   document.addEventListener('click', handleGlobalClick)
+  // 添加键盘事件监听
+  document.addEventListener('keydown', handleKeyDown)
 
   // 初始化时自动生成一个1:1比例的虚线框
   initializeDashedElement()
 })
 
-// 组件卸载时移除全局点击事件监听器
+// 组件卸载时移除全局事件监听器
 onUnmounted(() => {
   document.removeEventListener('click', handleGlobalClick)
+  // 移除键盘事件监听
+  document.removeEventListener('keydown', handleKeyDown)
 })
+
+// 键盘事件处理
+const handleKeyDown = (event: KeyboardEvent) => {
+  // 检查是否按下了删除键或退格键
+  if ((event.key === 'Delete' || event.key === 'Backspace') && selectedElementId.value) {
+    // 调用删除元素函数
+    deleteElement()
+  }
+}
 
 // 初始化虚线框
 const initializeDashedElement = () => {
