@@ -3,17 +3,43 @@
     <!-- 左侧资产列表 -->
     <div class="w-64 bg-white border-r border-gray-200 overflow-hidden">
       <h2 class="p-4 text-lg font-semibold bg-gray-50 border-b border-gray-200">资产列表</h2>
-      <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-60px)]">
-        <div
-          v-for="(asset, index) in assets"
-          :key="index"
-          class="cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow"
-          draggable="true"
-          @dragstart="onDragStart($event, asset)"
+
+      <!-- 资产类型标签页 -->
+      <div class="border-b border-gray-200 flex">
+        <button
+          v-for="tab in assetTabs"
+          :key="tab.value"
+          :class="[
+            'flex-1 py-2 px-4 text-sm font-medium transition-colors',
+            currentAssetTab === tab.value
+              ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
+          ]"
+          @click="currentAssetTab = tab.value"
         >
-          <img :src="asset.url" :alt="asset.name" class="w-full h-32 object-cover" />
+          {{ tab.label }}
+        </button>
+      </div>
+
+      <!-- 资产列表 -->
+      <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-104px)]">
+        <div
+          v-for="(asset, index) in filteredAssets"
+          :key="index"
+          class="cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow mb-2"
+          draggable="true"
+          @dragstart="onDragStart($event, asset as any)"
+        >
+          <img
+            :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
+            :alt="asset.name"
+            class="w-full h-32 object-cover"
+          />
           <div class="p-2 text-sm text-center">
             {{ asset.name }}
+          </div>
+          <div class="text-xs text-gray-500 pb-2 text-center">
+            {{ asset.type === 'pose' ? '预设姿势' : '图片' }}
           </div>
         </div>
       </div>
@@ -132,6 +158,20 @@
             >
               {{ element.number }}
             </div>
+
+            <!-- 人物元素 -->
+            <HumanFigure
+              v-else-if="element.type === 'human'"
+              :left="element.left"
+              :top="element.top"
+              :width="element.width || 150"
+              :height="element.height || 250"
+              :rotation="element.rotation || 0"
+              :figureType="element.figureType || 'cartoon'"
+              :pose="element.pose || 'standing'"
+              @select="selectElement(element.id)"
+              @jointMousedown="onHumanJointMouseDown($event, element)"
+            />
 
             <!-- 缩放控制点 -->
             <div
@@ -462,19 +502,21 @@
 </style>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import HumanFigure from './components/HumanFigure.vue'
 
 // 资产数据类型定义
 interface Asset {
   id: number
   name: string
+  type: 'image'
   url: string
 }
 
 // 画布元素数据类型定义
 interface CanvasElement {
   id: string
-  type: 'image' | 'text' | 'rect' | 'dashed' | 'number'
+  type: 'image' | 'text' | 'rect' | 'dashed' | 'number' | 'human'
   left: number
   top: number
   width?: number
@@ -487,33 +529,98 @@ interface CanvasElement {
   aspectRatio?: number // 宽高比，仅用于图片和虚线框元素
   screenshot?: string // 截图数据，仅用于虚线框元素
   rotation?: number // 旋转角度，单位：度
+  figureType?: string // 人物类型
+  pose?: string // 人物姿势
 }
 
-// 资产列表数据
-const assets = ref<Asset[]>([
+// 预设姿势类型定义
+interface Pose {
+  id: number
+  name: string
+  type: 'pose'
+  poseId: string
+  thumbnail: string
+}
+
+// 合并资产类型
+type CombinedAsset = Asset | Pose
+
+// 人物姿势库
+const poseAssets = ref<Pose[]>([
+  {
+    id: 1,
+    name: '站立姿势',
+    type: 'pose',
+    poseId: 'standing',
+    thumbnail: 'https://picsum.photos/300/300?random=21',
+  },
+  {
+    id: 2,
+    name: '挥手姿势',
+    type: 'pose',
+    poseId: 'waving',
+    thumbnail: 'https://picsum.photos/300/300?random=22',
+  },
+  {
+    id: 3,
+    name: '坐姿',
+    type: 'pose',
+    poseId: 'sitting',
+    thumbnail: 'https://picsum.photos/300/300?random=23',
+  },
+  {
+    id: 4,
+    name: '思考姿势',
+    type: 'pose',
+    poseId: 'thinking',
+    thumbnail: 'https://picsum.photos/300/300?random=24',
+  },
+  {
+    id: 5,
+    name: '跑步姿势',
+    type: 'pose',
+    poseId: 'running',
+    thumbnail: 'https://picsum.photos/300/300?random=25',
+  },
+  {
+    id: 6,
+    name: '跳跃姿势',
+    type: 'pose',
+    poseId: 'jumping',
+    thumbnail: 'https://picsum.photos/300/300?random=26',
+  },
+])
+
+// 图片资产
+const imageAssets = ref<Asset[]>([
   {
     id: 1,
     name: '示例图片1',
+    type: 'image',
     url: 'https://picsum.photos/300/200?random=1',
   },
   {
     id: 2,
     name: '示例图片2',
+    type: 'image',
     url: 'https://picsum.photos/300/200?random=2',
   },
   {
     id: 3,
     name: '示例图片3',
+    type: 'image',
     url: 'https://picsum.photos/300/200?random=3',
   },
   {
     id: 4,
     name: '示例图片4',
+    type: 'image',
     url: 'https://picsum.photos/300/200?random=4',
   },
   {
     id: 5,
     name: '示例图片5',
+    type: 'image',
     url: 'https://picsum.photos/300/200?random=5',
   },
 ])
@@ -568,6 +675,24 @@ const tempRect = ref<{ left: number; top: number; width: number; height: number 
 
 // 工具栏引用
 const toolbarRef = ref<HTMLElement | null>(null)
+
+// 资产库标签页配置
+const assetTabs = ref<{ label: string; value: 'images' | 'poses' }[]>([
+  { label: '图片资源', value: 'images' },
+  { label: '人物姿势', value: 'poses' },
+])
+
+// 当前选中的标签页
+const currentAssetTab = ref<'images' | 'poses'>('images')
+
+// 根据当前标签页过滤资产
+const filteredAssets = computed(() => {
+  if (currentAssetTab.value === 'images') {
+    return imageAssets.value
+  } else {
+    return poseAssets.value
+  }
+})
 
 // 组件挂载时添加全局事件监听器
 onMounted(() => {
@@ -645,7 +770,7 @@ const handleGlobalClick = (event: MouseEvent) => {
 }
 
 // 拖拽开始处理
-const onDragStart = (event: DragEvent, asset: Asset) => {
+const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
   if (event.dataTransfer) {
     // 获取鼠标在缩略图上的相对位置
     const target = event.target as HTMLElement
@@ -684,6 +809,18 @@ const onElementMouseDown = (event: MouseEvent, element: CanvasElement) => {
     document.addEventListener('mousemove', onDragMove)
     document.addEventListener('mouseup', onDragEnd)
   }
+}
+
+// 人物关节鼠标按下事件
+const onHumanJointMouseDown = (event: MouseEvent, element: CanvasElement) => {
+  if (!editMode.value) return
+  event.stopPropagation()
+
+  // 这里可以添加人物关节旋转的逻辑
+  console.log('人物关节被点击:', element.id, event)
+
+  // 例如：显示旋转辅助线，添加旋转事件监听等
+  selectElement(element.id)
 }
 
 // 拖拽移动
@@ -880,18 +1017,15 @@ const onDrop = (event: DragEvent) => {
   const dragDataStr = event.dataTransfer.getData('asset')
   if (dragDataStr) {
     const dragData = JSON.parse(dragDataStr)
-    const asset = dragData.asset as Asset
+    const asset = dragData.asset
     const rect = canvasRef.value.getBoundingClientRect()
     const dropX = event.clientX - rect.left
     const dropY = event.clientY - rect.top
 
-    // 创建临时图片对象获取原始宽高比
-    const img = new Image()
-    img.onload = () => {
-      const aspectRatio = img.width / img.height
-      // 设置初始宽度为200，高度根据宽高比计算
-      const initialWidth = 200
-      const initialHeight = initialWidth / aspectRatio
+    if (asset.type === 'pose') {
+      // 处理姿势拖拽 - 直接创建人物元素并应用姿势
+      const initialWidth = 150
+      const initialHeight = 250
 
       // 计算缩放比例
       const scaleX = initialWidth / dragData.thumbnailWidth
@@ -905,19 +1039,51 @@ const onDrop = (event: DragEvent) => {
       const left = dropX - scaledRelativeX
       const top = dropY - scaledRelativeY
 
-      // 添加图片元素到画布
+      // 添加人物元素到画布
       addCanvasElement({
-        type: 'image',
-        url: asset.url,
+        type: 'human',
         name: asset.name,
         left,
         top,
         width: initialWidth,
         height: initialHeight,
-        aspectRatio, // 保存宽高比
+        figureType: 'cartoon', // 默认卡通风格
+        pose: asset.poseId, // 应用拖拽的姿势
       })
+    } else if (asset.type === 'image') {
+      // 原有图片拖拽处理
+      const img = new Image()
+      img.onload = () => {
+        const aspectRatio = img.width / img.height
+        const initialWidth = 200
+        const initialHeight = initialWidth / aspectRatio
+
+        // 计算缩放比例
+        const scaleX = initialWidth / dragData.thumbnailWidth
+        const scaleY = initialHeight / dragData.thumbnailHeight
+
+        // 计算鼠标在大图上的相对位置
+        const scaledRelativeX = dragData.relativeX * scaleX
+        const scaledRelativeY = dragData.relativeY * scaleY
+
+        // 计算大图的左上角位置
+        const left = dropX - scaledRelativeX
+        const top = dropY - scaledRelativeY
+
+        // 添加图片元素到画布
+        addCanvasElement({
+          type: 'image',
+          url: asset.url,
+          name: asset.name,
+          left,
+          top,
+          width: initialWidth,
+          height: initialHeight,
+          aspectRatio, // 保存宽高比
+        })
+      }
+      img.src = asset.url
     }
-    img.src = asset.url
   }
 }
 
