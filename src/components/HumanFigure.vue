@@ -294,6 +294,10 @@ const isRotating = ref(false)
 const currentJoint = ref<string | null>(null)
 const startMousePos = ref({ x: 0, y: 0 })
 const startRotation = ref(0)
+// 跟踪上一次角度，用于实现连续旋转
+const lastAngle = ref(0)
+// 累计旋转角度，用于处理连续旋转
+const cumulativeRotation = ref(0)
 
 // 肢体旋转事件处理
 const onJointMouseDown = (event: MouseEvent, jointId: string) => {
@@ -328,6 +332,72 @@ const onJointMouseDown = (event: MouseEvent, jointId: string) => {
     case 'right-lower-leg':
       startRotation.value = rightLowerLegRotation.value
       break
+  }
+
+  // 获取人物元素，计算当前鼠标位置对应的初始角度
+  const figureElement = document.querySelector('.human-figure') as HTMLElement
+  if (figureElement) {
+    const rect = figureElement.getBoundingClientRect()
+    const mouseX = event.clientX - rect.left
+    const mouseY = event.clientY - rect.top
+
+    // 根据关节类型获取旋转中心
+    let jointX = 0
+    let jointY = 0
+
+    switch (jointId) {
+      case 'left-arm':
+        jointX = rect.width * 0.25
+        jointY = rect.height * 0.2
+        break
+      case 'right-arm':
+        jointX = rect.width * 0.75
+        jointY = rect.height * 0.2
+        break
+      case 'left-lower-arm': {
+        const leftUpperArmAngle = ((leftArmRotation.value + 90) * Math.PI) / 180
+        const upperArmLength = rect.height * 0.38
+        jointX = rect.width * 0.25 + Math.cos(leftUpperArmAngle) * upperArmLength
+        jointY = rect.height * 0.2 + Math.sin(leftUpperArmAngle) * upperArmLength
+        break
+      }
+      case 'right-lower-arm': {
+        const rightUpperArmAngle = ((rightArmRotation.value + 90) * Math.PI) / 180
+        const upperArmLength = rect.height * 0.38
+        jointX = rect.width * 0.75 + Math.cos(rightUpperArmAngle) * upperArmLength
+        jointY = rect.height * 0.2 + Math.sin(rightUpperArmAngle) * upperArmLength
+        break
+      }
+      case 'left-leg':
+        jointX = rect.width * 0.4
+        jointY = rect.height * 0.65
+        break
+      case 'right-leg':
+        jointX = rect.width * 0.6
+        jointY = rect.height * 0.65
+        break
+      case 'left-lower-leg': {
+        const leftUpperLegAngle = ((leftLegRotation.value + 90) * Math.PI) / 180
+        const upperLegLength = rect.height * 0.38
+        jointX = rect.width * 0.4 + Math.cos(leftUpperLegAngle) * upperLegLength
+        jointY = rect.height * 0.65 + Math.sin(leftUpperLegAngle) * upperLegLength
+        break
+      }
+      case 'right-lower-leg': {
+        const rightUpperLegAngle = ((rightLegRotation.value + 90) * Math.PI) / 180
+        const upperLegLength = rect.height * 0.38
+        jointX = rect.width * 0.6 + Math.cos(rightUpperLegAngle) * upperLegLength
+        jointY = rect.height * 0.65 + Math.sin(rightUpperLegAngle) * upperLegLength
+        break
+      }
+    }
+
+    // 计算当前鼠标位置对应的角度，作为累积旋转的起始值
+    const deltaX = mouseX - jointX
+    const deltaY = mouseY - jointY
+    lastAngle.value = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+    // 累积旋转起始值 = 当前肢体旋转角度 + 90（基础偏移）
+    cumulativeRotation.value = startRotation.value + 90
   }
 
   // 添加全局鼠标事件监听
@@ -427,10 +497,26 @@ const onMouseMove = (event: MouseEvent) => {
   // 计算鼠标相对于旋转中心的角度
   const deltaX = mouseX - jointX
   const deltaY = mouseY - jointY
-  const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+  const currentAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+
+  // 计算与上一次角度的差值，处理连续旋转
+  let angleDiff = currentAngle - lastAngle.value
+
+  // 处理角度突变（当鼠标跨越360°边界时）
+  if (angleDiff > 180) {
+    angleDiff -= 360
+  } else if (angleDiff < -180) {
+    angleDiff += 360
+  }
+
+  // 累积旋转角度
+  cumulativeRotation.value += angleDiff
+
+  // 更新上一次角度
+  lastAngle.value = currentAngle
 
   // 计算基础角度（使肢体自然下垂）
-  const baseAngle = angle - 90
+  const baseAngle = cumulativeRotation.value - 90
 
   // 更新对应肢体的旋转角度
   switch (currentJoint.value) {
