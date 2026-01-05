@@ -352,6 +352,23 @@ const onMouseMove = (event: MouseEvent) => {
   const mouseX = event.clientX - rect.left
   const mouseY = event.clientY - rect.top
 
+  // 获取肩部位置（固定位置）
+  const leftShoulderX = rect.width * 0.25
+  const leftShoulderY = rect.height * 0.2
+  const rightShoulderX = rect.width * 0.75
+  const rightShoulderY = rect.height * 0.2
+  const leftHipX = rect.width * 0.4
+  const leftHipY = rect.height * 0.65
+  const rightHipX = rect.width * 0.6
+  const rightHipY = rect.height * 0.65
+
+  // 计算上臂长度，与CSS中的比例保持一致
+  // CSS中upper-arm高度为38%，对应rect.height * 0.38
+  // 但实际旋转半径需要考虑从肩部到肘部的距离
+  const upperArmLength = rect.height * 0.38
+  // CSS中upper-leg高度为38%，对应rect.height * 0.38
+  const upperLegLength = rect.height * 0.38
+
   // 根据当前关节点获取旋转中心
   let jointX = 0
   let jointY = 0
@@ -359,43 +376,51 @@ const onMouseMove = (event: MouseEvent) => {
   switch (currentJoint.value) {
     case 'left-arm':
       // 左臂旋转中心：肩部
-      jointX = rect.width * 0.25
-      jointY = rect.height * 0.2
+      jointX = leftShoulderX
+      jointY = leftShoulderY
       break
     case 'right-arm':
       // 右臂旋转中心：肩部
-      jointX = rect.width * 0.75
-      jointY = rect.height * 0.2
+      jointX = rightShoulderX
+      jointY = rightShoulderY
       break
     case 'left-lower-arm':
       // 左前臂旋转中心：肘部
-      jointX = rect.width * 0.25
-      jointY = rect.height * 0.55
+      // 考虑上臂旋转后的肘部位置
+      const leftUpperArmAngle = ((leftArmRotation.value + 90) * Math.PI) / 180
+      jointX = leftShoulderX + Math.cos(leftUpperArmAngle) * upperArmLength
+      jointY = leftShoulderY + Math.sin(leftUpperArmAngle) * upperArmLength
       break
     case 'right-lower-arm':
       // 右前臂旋转中心：肘部
-      jointX = rect.width * 0.75
-      jointY = rect.height * 0.55
+      // 考虑上臂旋转后的肘部位置
+      const rightUpperArmAngle = ((rightArmRotation.value + 90) * Math.PI) / 180
+      jointX = rightShoulderX + Math.cos(rightUpperArmAngle) * upperArmLength
+      jointY = rightShoulderY + Math.sin(rightUpperArmAngle) * upperArmLength
       break
     case 'left-leg':
       // 左腿旋转中心：髋部
-      jointX = rect.width * 0.4
-      jointY = rect.height * 0.65
+      jointX = leftHipX
+      jointY = leftHipY
       break
     case 'right-leg':
       // 右腿旋转中心：髋部
-      jointX = rect.width * 0.6
-      jointY = rect.height * 0.65
+      jointX = rightHipX
+      jointY = rightHipY
       break
     case 'left-lower-leg':
       // 左小腿旋转中心：膝盖
-      jointX = rect.width * 0.4
-      jointY = rect.height * 0.95
+      // 考虑大腿旋转后的膝盖位置
+      const leftUpperLegAngle = ((leftLegRotation.value + 90) * Math.PI) / 180
+      jointX = leftHipX + Math.cos(leftUpperLegAngle) * upperLegLength
+      jointY = leftHipY + Math.sin(leftUpperLegAngle) * upperLegLength
       break
     case 'right-lower-leg':
       // 右小腿旋转中心：膝盖
-      jointX = rect.width * 0.6
-      jointY = rect.height * 0.95
+      // 考虑大腿旋转后的膝盖位置
+      const rightUpperLegAngle = ((rightLegRotation.value + 90) * Math.PI) / 180
+      jointX = rightHipX + Math.cos(rightUpperLegAngle) * upperLegLength
+      jointY = rightHipY + Math.sin(rightUpperLegAngle) * upperLegLength
       break
   }
 
