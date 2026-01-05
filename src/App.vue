@@ -61,6 +61,10 @@
           @dragover.prevent
           @drop="onDrop"
           @click="onCanvasClick"
+          @mousedown="onCanvasMouseDown"
+          @mousemove="onCanvasMouseMove"
+          @mouseup="onCanvasMouseUp"
+          @mouseleave="onCanvasMouseUp"
         >
           <!-- 画布元素 -->
           <div
@@ -91,8 +95,8 @@
             <!-- 矩形框元素 -->
             <div
               v-else-if="element.type === 'rect'"
-              class="w-full h-full"
-              :style="{ backgroundColor: element.color }"
+              class="w-full h-full border border-solid"
+              :style="{ borderColor: element.color, backgroundColor: 'transparent' }"
             ></div>
             <!-- 数字标元素 -->
             <div
@@ -152,6 +156,20 @@
               @mousedown.stop="onResizeStart($event, element, 'w')"
             ></div>
           </div>
+
+          <!-- 临时绘制的矩形框 -->
+          <div
+            v-if="tempRect && isDrawingRect"
+            class="absolute border-2 border-dashed pointer-events-none"
+            :style="{
+              left: `${tempRect.left}px`,
+              top: `${tempRect.top}px`,
+              width: `${tempRect.width}px`,
+              height: `${tempRect.height}px`,
+              borderColor: colorList[currentColorIndex],
+              backgroundColor: 'transparent',
+            }"
+          ></div>
         </div>
       </div>
     </div>
@@ -339,12 +357,17 @@ const currentNumber = ref(1)
 // 拖拽状态管理
 const isDragging = ref(false)
 const isResizing = ref(false)
+const isDrawingRect = ref(false)
 const currentDragElement = ref<CanvasElement | null>(null)
 const currentResizeElement = ref<CanvasElement | null>(null)
 const resizeDirection = ref<'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | null>(null)
 const dragStartPos = ref({ x: 0, y: 0 })
 const resizeStartPos = ref({ x: 0, y: 0 })
 const resizeStartSize = ref({ width: 0, height: 0 })
+
+// 矩形框绘制状态
+const drawStartPos = ref({ x: 0, y: 0 })
+const tempRect = ref<{ left: number; top: number; width: number; height: number } | null>(null)
 
 // 组件挂载时添加全局点击事件监听器
 onMounted(() => {
@@ -669,8 +692,69 @@ const onElementClick = (event: MouseEvent) => {
   }
 }
 
+// 画布鼠标按下处理
+const onCanvasMouseDown = (event: MouseEvent) => {
+  if (!canvasRef.value || !editMode.value || !activeTool.value) return
+
+  const rect = canvasRef.value.getBoundingClientRect()
+  const x = event.clientX - rect.left
+  const y = event.clientY - rect.top
+
+  // 如果当前工具是矩形框，开始绘制
+  if (activeTool.value === 'rect') {
+    isDrawingRect.value = true
+    drawStartPos.value = { x, y }
+    tempRect.value = { left: x, top: y, width: 0, height: 0 }
+  }
+}
+
+// 画布鼠标移动处理
+const onCanvasMouseMove = (event: MouseEvent) => {
+  if (!canvasRef.value || !isDrawingRect.value || !tempRect.value) return
+
+  const rect = canvasRef.value.getBoundingClientRect()
+  const x = event.clientX - rect.left
+  const y = event.clientY - rect.top
+
+  // 计算矩形的左上角和宽高
+  const left = Math.min(drawStartPos.value.x, x)
+  const top = Math.min(drawStartPos.value.y, y)
+  const width = Math.abs(x - drawStartPos.value.x)
+  const height = Math.abs(y - drawStartPos.value.y)
+
+  // 更新临时矩形
+  tempRect.value = { left, top, width, height }
+}
+
+// 画布鼠标释放处理
+const onCanvasMouseUp = () => {
+  if (!isDrawingRect.value || !tempRect.value) return
+
+  // 确保绘制的矩形有一定大小
+  if (tempRect.value.width > 5 && tempRect.value.height > 5) {
+    // 添加矩形元素到画布
+    addCanvasElement({
+      type: 'rect',
+      color: colorList.value[currentColorIndex.value],
+      left: tempRect.value.left,
+      top: tempRect.value.top,
+      width: tempRect.value.width,
+      height: tempRect.value.height,
+    })
+    // 更新颜色索引
+    currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
+  }
+
+  // 重置绘制状态
+  isDrawingRect.value = false
+  tempRect.value = null
+}
+
 // 画布点击处理
 const onCanvasClick = (event: MouseEvent) => {
+  // 如果正在绘制矩形，不处理点击事件
+  if (isDrawingRect.value) return
+
   if (!canvasRef.value || !editMode.value || !activeTool.value) return
 
   const rect = canvasRef.value.getBoundingClientRect()
@@ -690,16 +774,7 @@ const onCanvasClick = (event: MouseEvent) => {
       })
       break
     case 'rect':
-      addCanvasElement({
-        type: 'rect',
-        color: colorList.value[currentColorIndex.value],
-        left,
-        top,
-        width: 100,
-        height: 100,
-      })
-      // 更新颜色索引
-      currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
+      // 矩形框现在通过拖拽绘制，点击不再生成
       break
     case 'number':
       const numberSize = 32
