@@ -68,7 +68,7 @@
             :key="element.id"
             :class="['absolute', { 'ring-2 ring-blue-400': selectedElementId === element.id }]"
             :style="getElementStyle(element)"
-            @click.stop="activeTool ? undefined : selectElement(element.id)"
+            @click="activeTool ? onElementClick($event) : selectElement(element.id)"
             @mousedown="onElementMouseDown($event, element)"
           >
             <!-- 图片元素 -->
@@ -77,6 +77,7 @@
               :src="element.url"
               :alt="element.name"
               class="w-full h-full object-cover"
+              @click.stop="activeTool ? onElementClick($event) : undefined"
             />
             <!-- 文本框元素 -->
             <div
@@ -582,6 +583,54 @@ const onDrop = (event: DragEvent) => {
       })
     }
     img.src = asset.url
+  }
+}
+
+// 元素点击处理
+const onElementClick = (event: MouseEvent) => {
+  if (!canvasRef.value || !editMode.value || !activeTool.value) return
+  event.stopPropagation()
+
+  const rect = canvasRef.value.getBoundingClientRect()
+  const left = event.clientX - rect.left
+  const top = event.clientY - rect.top
+
+  switch (activeTool.value) {
+    case 'text':
+      addCanvasElement({
+        type: 'text',
+        content: '输入文本',
+        color: '#000000',
+        left,
+        top,
+        width: 150,
+        height: 50,
+      })
+      break
+    case 'rect':
+      addCanvasElement({
+        type: 'rect',
+        color: colorList.value[currentColorIndex.value],
+        left,
+        top,
+        width: 100,
+        height: 100,
+      })
+      // 更新颜色索引
+      currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
+      break
+    case 'number':
+      addCanvasElement({
+        type: 'number',
+        number: currentNumber.value,
+        left,
+        top,
+        width: 32,
+        height: 32,
+      })
+      // 更新数字标序号
+      currentNumber.value++
+      break
   }
 }
 
