@@ -392,6 +392,32 @@
                 />
               </div>
             </div>
+
+            <!-- 图片和矩形框的旋转角度 -->
+            <div
+              v-if="selectedElement.type === 'image' || selectedElement.type === 'rect'"
+              class="mt-4"
+            >
+              <label class="block text-sm font-medium text-gray-700 mb-1">旋转角度</label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="range"
+                  v-model.number="selectedElement.rotation"
+                  min="0"
+                  max="360"
+                  step="1"
+                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <input
+                  type="number"
+                  v-model.number="selectedElement.rotation"
+                  min="0"
+                  max="360"
+                  class="w-16 p-1 border border-gray-300 rounded"
+                />
+                <span class="text-sm text-gray-500">°</span>
+              </div>
+            </div>
           </div>
         </div>
         <div v-else class="text-center text-gray-500 py-8">请选择一个元素</div>
@@ -434,6 +460,7 @@ interface CanvasElement {
   number?: number
   aspectRatio?: number // 宽高比，仅用于图片和虚线框元素
   screenshot?: string // 截图数据，仅用于虚线框元素
+  rotation?: number // 旋转角度，单位：度
 }
 
 // 资产列表数据
@@ -1023,6 +1050,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
     width: element.width || 100,
     height: element.height || 100,
     content: element.content || '',
+    rotation: element.rotation || 0,
     ...element,
   }
   canvasElements.value.push(newElement)
@@ -1108,6 +1136,8 @@ const getElementStyle = (element: CanvasElement) => {
     height: `${element.height}px`,
     color: element.color,
     position: 'absolute' as const,
+    transform: `rotate(${element.rotation || 0}deg)`,
+    transformOrigin: 'center',
   }
 }
 
