@@ -404,31 +404,39 @@ const onMouseMove = (event: MouseEvent) => {
   const deltaY = mouseY - jointY
   const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
 
+  // 计算基础角度（使肢体自然下垂）
+  const baseAngle = angle - 90
+
   // 更新对应肢体的旋转角度
   switch (currentJoint.value) {
     case 'left-arm':
-      leftArmRotation.value = angle - 90 // 调整初始角度，使手臂自然下垂
+      leftArmRotation.value = baseAngle
       break
     case 'right-arm':
-      rightArmRotation.value = angle - 90 // 调整初始角度，使手臂自然下垂
+      rightArmRotation.value = baseAngle
       break
     case 'left-lower-arm':
-      leftLowerArmRotation.value = angle - 90 // 调整初始角度，使下臂自然下垂
+      // 左前臂旋转：考虑上臂旋转角度，下臂是上臂的子元素，继承了上臂的旋转
+      // 需要减去上臂的旋转角度，确保下臂旋转能正确跟随鼠标
+      leftLowerArmRotation.value = baseAngle - leftArmRotation.value
       break
     case 'right-lower-arm':
-      rightLowerArmRotation.value = angle - 90 // 调整初始角度，使下臂自然下垂
+      // 右前臂旋转：考虑上臂旋转角度
+      rightLowerArmRotation.value = baseAngle - rightArmRotation.value
       break
     case 'left-leg':
-      leftLegRotation.value = angle - 90 // 调整初始角度，使腿部自然下垂
+      leftLegRotation.value = baseAngle
       break
     case 'right-leg':
-      rightLegRotation.value = angle - 90 // 调整初始角度，使腿部自然下垂
+      rightLegRotation.value = baseAngle
       break
     case 'left-lower-leg':
-      leftLowerLegRotation.value = angle - 90 // 调整初始角度，使小腿自然下垂
+      // 左小腿旋转：考虑大腿旋转角度
+      leftLowerLegRotation.value = baseAngle - leftLegRotation.value
       break
     case 'right-lower-leg':
-      rightLowerLegRotation.value = angle - 90 // 调整初始角度，使小腿自然下垂
+      // 右小腿旋转：考虑大腿旋转角度
+      rightLowerLegRotation.value = baseAngle - rightLegRotation.value
       break
   }
 }
@@ -496,6 +504,7 @@ const onMouseUp = () => {
   position: absolute;
   bottom: -120%;
   left: 0;
+  box-sizing: border-box;
   border-radius: 8px;
 }
 
