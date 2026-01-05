@@ -324,13 +324,45 @@
               />
             </div>
 
-            <div class="mt-6">
+            <div class="mt-6 mb-4">
               <button
                 class="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
                 @click="captureAndSendScreenshot(selectedElement)"
+                :disabled="isScreenshotLoading"
               >
-                重新截图
+                <span v-if="isScreenshotLoading" class="flex items-center justify-center">
+                  <span class="animate-spin mr-2">⏳</span> 截图中...
+                </span>
+                <span v-else>重新截图</span>
               </button>
+            </div>
+
+            <!-- 截图预览，放在最下面 -->
+            <div class="mt-6">
+              <label class="block text-sm font-medium text-gray-700 mb-1">截图预览</label>
+              <div class="border border-gray-300 rounded p-2 bg-gray-50 relative">
+                <!-- 截图loading状态 -->
+                <div
+                  v-if="isScreenshotLoading"
+                  class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded"
+                >
+                  <div class="flex flex-col items-center">
+                    <span class="animate-spin text-2xl mb-2">⏳</span>
+                    <span class="text-sm text-gray-600">截图生成中...</span>
+                  </div>
+                </div>
+
+                <!-- 截图内容 -->
+                <img
+                  v-if="selectedElement.screenshot"
+                  :src="selectedElement.screenshot"
+                  alt="截图预览"
+                  class="w-full h-auto rounded"
+                />
+                <div v-else-if="!isScreenshotLoading" class="text-center text-gray-400 py-8">
+                  点击"重新截图"按钮生成截图
+                </div>
+              </div>
             </div>
           </div>
 
@@ -433,6 +465,9 @@ const editMode = ref(true)
 // 主虚线框引用
 const mainDashedElement = ref<CanvasElement | null>(null)
 
+// 截图loading状态
+const isScreenshotLoading = ref(false)
+
 // 画布引用
 const canvasRef = ref<HTMLElement | null>(null)
 
@@ -502,8 +537,7 @@ const initializeDashedElement = () => {
   mainDashedElement.value = dashedElement
   selectedElementId.value = dashedElement.id
 
-  // 自动截图
-  captureAndSendScreenshot(dashedElement)
+  // 不再自动截图，只有在用户点击"重新截图"按钮时才截图
 }
 
 // 全局点击事件处理，点击画布以外区域取消工具激活
@@ -996,6 +1030,9 @@ const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
   if (!canvasRef.value) return
 
   try {
+    // 开始截图，显示loading
+    isScreenshotLoading.value = true
+
     // 使用 html2canvas 进行截图
     const html2canvas = (await import('html2canvas')).default
 
@@ -1048,6 +1085,9 @@ const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
     // console.log('后端返回结果:', result)
   } catch (error) {
     console.error('截图失败:', error)
+  } finally {
+    // 截图完成，隐藏loading
+    isScreenshotLoading.value = false
   }
 }
 </script>
