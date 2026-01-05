@@ -25,21 +25,21 @@
       <div class="h-12 bg-white border-b border-gray-200 flex items-center px-4 space-x-2">
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = 'text'"
+          @click="activeTool = activeTool === 'text' ? null : 'text'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'text' }"
         >
           文本框
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = 'rect'"
+          @click="activeTool = activeTool === 'rect' ? null : 'rect'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'rect' }"
         >
           矩形框
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = 'number'"
+          @click="activeTool = activeTool === 'number' ? null : 'number'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'number' }"
         >
           数字标
