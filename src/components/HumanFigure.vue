@@ -101,15 +101,6 @@
           ></div>
         </div>
       </div>
-
-      <!-- 关节控制点 -->
-      <div
-        v-for="joint in joints"
-        :key="joint.id"
-        class="joint-control"
-        :style="getJointStyle(joint)"
-        @mousedown.stop="onJointMouseDown($event, joint.id)"
-      ></div>
     </div>
   </div>
 </template>
@@ -235,19 +226,6 @@ watch(
   { immediate: true },
 )
 
-// 关节点定义
-const joints = ref([
-  { id: 'head', x: 50, y: 15 },
-  { id: 'left-arm', x: 25, y: 30 },
-  { id: 'right-arm', x: 75, y: 30 },
-  { id: 'left-lower-arm', x: 15, y: 55 },
-  { id: 'right-lower-arm', x: 85, y: 55 },
-  { id: 'left-leg', x: 40, y: 75 },
-  { id: 'right-leg', x: 60, y: 75 },
-  { id: 'left-lower-leg', x: 35, y: 95 },
-  { id: 'right-lower-leg', x: 65, y: 95 },
-])
-
 // 人物样式
 const figureStyle = computed(() => {
   return {
@@ -311,29 +289,13 @@ const getPartStyle = (part: string) => {
   }
 }
 
-// 获取关节点样式
-const getJointStyle = (joint: { id: string; x: number; y: number }) => {
-  return {
-    position: 'absolute' as const,
-    width: '12px',
-    height: '12px',
-    backgroundColor: '#e74c3c',
-    borderRadius: '50%',
-    left: `${joint.x}%`,
-    top: `${joint.y}%`,
-    transform: 'translate(-50%, -50%)',
-    cursor: 'pointer' as const,
-    zIndex: 10,
-  }
-}
-
 // 拖拽旋转状态
 const isRotating = ref(false)
 const currentJoint = ref<string | null>(null)
 const startMousePos = ref({ x: 0, y: 0 })
 const startRotation = ref(0)
 
-// 关节点鼠标按下事件
+// 肢体旋转事件处理
 const onJointMouseDown = (event: MouseEvent, jointId: string) => {
   event.stopPropagation()
   isRotating.value = true
@@ -543,14 +505,5 @@ const onMouseUp = () => {
 
 .leg {
   height: 45% !important;
-}
-
-.joint-control {
-  transition: all 0.2s ease;
-}
-
-.joint-control:hover {
-  transform: translate(-50%, -50%) scale(1.3);
-  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
 }
 </style>
