@@ -30,14 +30,15 @@
             transform: `rotate(${leftArmRotation}deg)`,
             transformOrigin: 'top center',
           }"
-        ></div>
-        <div
-          class="arm-part lower-arm"
-          :style="{
-            transform: `rotate(${leftLowerArmRotation}deg)`,
-            transformOrigin: 'top center',
-          }"
-        ></div>
+        >
+          <div
+            class="arm-part lower-arm"
+            :style="{
+              transform: `rotate(${leftLowerArmRotation}deg)`,
+              transformOrigin: 'bottom center',
+            }"
+          ></div>
+        </div>
       </div>
 
       <!-- 右臂 -->
@@ -52,14 +53,15 @@
             transform: `rotate(${rightArmRotation}deg)`,
             transformOrigin: 'top center',
           }"
-        ></div>
-        <div
-          class="arm-part lower-arm"
-          :style="{
-            transform: `rotate(${rightLowerArmRotation}deg)`,
-            transformOrigin: 'top center',
-          }"
-        ></div>
+        >
+          <div
+            class="arm-part lower-arm"
+            :style="{
+              transform: `rotate(${rightLowerArmRotation}deg)`,
+              transformOrigin: 'bottom center',
+            }"
+          ></div>
+        </div>
       </div>
 
       <!-- 左腿 -->
@@ -74,14 +76,15 @@
             transform: `rotate(${leftLegRotation}deg)`,
             transformOrigin: 'top center',
           }"
-        ></div>
-        <div
-          class="leg-part lower-leg"
-          :style="{
-            transform: `rotate(${leftLowerLegRotation}deg)`,
-            transformOrigin: 'top center',
-          }"
-        ></div>
+        >
+          <div
+            class="leg-part lower-leg"
+            :style="{
+              transform: `rotate(${leftLowerLegRotation}deg)`,
+              transformOrigin: 'bottom center',
+            }"
+          ></div>
+        </div>
       </div>
 
       <!-- 右腿 -->
@@ -96,14 +99,15 @@
             transform: `rotate(${rightLegRotation}deg)`,
             transformOrigin: 'top center',
           }"
-        ></div>
-        <div
-          class="leg-part lower-leg"
-          :style="{
-            transform: `rotate(${rightLowerLegRotation}deg)`,
-            transformOrigin: 'top center',
-          }"
-        ></div>
+        >
+          <div
+            class="leg-part lower-leg"
+            :style="{
+              transform: `rotate(${rightLowerLegRotation}deg)`,
+              transformOrigin: 'bottom center',
+            }"
+          ></div>
+        </div>
       </div>
 
       <!-- 关节控制点 -->
@@ -244,8 +248,12 @@ const joints = ref([
   { id: 'head', x: 50, y: 15 },
   { id: 'left-arm', x: 25, y: 30 },
   { id: 'right-arm', x: 75, y: 30 },
+  { id: 'left-lower-arm', x: 15, y: 55 },
+  { id: 'right-lower-arm', x: 85, y: 55 },
   { id: 'left-leg', x: 40, y: 75 },
   { id: 'right-leg', x: 60, y: 75 },
+  { id: 'left-lower-leg', x: 35, y: 95 },
+  { id: 'right-lower-leg', x: 65, y: 95 },
 ])
 
 // 人物样式
@@ -348,11 +356,23 @@ const onJointMouseDown = (event: MouseEvent, jointId: string) => {
     case 'right-arm':
       startRotation.value = rightArmRotation.value
       break
+    case 'left-lower-arm':
+      startRotation.value = leftLowerArmRotation.value
+      break
+    case 'right-lower-arm':
+      startRotation.value = rightLowerArmRotation.value
+      break
     case 'left-leg':
       startRotation.value = leftLegRotation.value
       break
     case 'right-leg':
       startRotation.value = rightLegRotation.value
+      break
+    case 'left-lower-leg':
+      startRotation.value = leftLowerLegRotation.value
+      break
+    case 'right-lower-leg':
+      startRotation.value = rightLowerLegRotation.value
       break
   }
 
@@ -368,25 +388,93 @@ const onJointMouseDown = (event: MouseEvent, jointId: string) => {
 const onMouseMove = (event: MouseEvent) => {
   if (!isRotating.value || !currentJoint.value) return
 
-  const deltaX = event.clientX - startMousePos.value.x
-  const deltaY = event.clientY - startMousePos.value.y
+  // 获取人物元素
+  const figureElement = document.querySelector('.human-figure') as HTMLElement
+  if (!figureElement) return
 
-  // 计算旋转角度（简化计算，实际可以根据关节点位置计算）
-  const rotationDelta = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+  const rect = figureElement.getBoundingClientRect()
+
+  // 计算鼠标在元素内部的相对位置
+  const mouseX = event.clientX - rect.left
+  const mouseY = event.clientY - rect.top
+
+  // 根据当前关节点获取旋转中心
+  let jointX = 0
+  let jointY = 0
+
+  switch (currentJoint.value) {
+    case 'left-arm':
+      // 左臂旋转中心：肩部
+      jointX = rect.width * 0.25
+      jointY = rect.height * 0.2
+      break
+    case 'right-arm':
+      // 右臂旋转中心：肩部
+      jointX = rect.width * 0.75
+      jointY = rect.height * 0.2
+      break
+    case 'left-lower-arm':
+      // 左前臂旋转中心：肘部
+      jointX = rect.width * 0.25
+      jointY = rect.height * 0.55
+      break
+    case 'right-lower-arm':
+      // 右前臂旋转中心：肘部
+      jointX = rect.width * 0.75
+      jointY = rect.height * 0.55
+      break
+    case 'left-leg':
+      // 左腿旋转中心：髋部
+      jointX = rect.width * 0.4
+      jointY = rect.height * 0.65
+      break
+    case 'right-leg':
+      // 右腿旋转中心：髋部
+      jointX = rect.width * 0.6
+      jointY = rect.height * 0.65
+      break
+    case 'left-lower-leg':
+      // 左小腿旋转中心：膝盖
+      jointX = rect.width * 0.4
+      jointY = rect.height * 0.95
+      break
+    case 'right-lower-leg':
+      // 右小腿旋转中心：膝盖
+      jointX = rect.width * 0.6
+      jointY = rect.height * 0.95
+      break
+  }
+
+  // 计算鼠标相对于旋转中心的角度
+  const deltaX = mouseX - jointX
+  const deltaY = mouseY - jointY
+  const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
 
   // 更新对应肢体的旋转角度
   switch (currentJoint.value) {
     case 'left-arm':
-      leftArmRotation.value = startRotation.value + rotationDelta * 0.5
+      leftArmRotation.value = angle - 90 // 调整初始角度，使手臂自然下垂
       break
     case 'right-arm':
-      rightArmRotation.value = startRotation.value + rotationDelta * 0.5
+      rightArmRotation.value = angle - 90 // 调整初始角度，使手臂自然下垂
+      break
+    case 'left-lower-arm':
+      leftLowerArmRotation.value = angle - 90 // 调整初始角度，使下臂自然下垂
+      break
+    case 'right-lower-arm':
+      rightLowerArmRotation.value = angle - 90 // 调整初始角度，使下臂自然下垂
       break
     case 'left-leg':
-      leftLegRotation.value = startRotation.value + rotationDelta * 0.5
+      leftLegRotation.value = angle - 90 // 调整初始角度，使腿部自然下垂
       break
     case 'right-leg':
-      rightLegRotation.value = startRotation.value + rotationDelta * 0.5
+      rightLegRotation.value = angle - 90 // 调整初始角度，使腿部自然下垂
+      break
+    case 'left-lower-leg':
+      leftLowerLegRotation.value = angle - 90 // 调整初始角度，使小腿自然下垂
+      break
+    case 'right-lower-leg':
+      rightLowerLegRotation.value = angle - 90 // 调整初始角度，使小腿自然下垂
       break
   }
 }
@@ -435,22 +523,25 @@ const onMouseUp = () => {
 .arm-part,
 .leg-part {
   width: 100%;
-  position: absolute;
   background-color: #3498db;
   border: 2px solid #2980b9;
   transition: transform 0.1s ease;
+  position: relative;
 }
 
 .upper-arm,
 .upper-leg {
-  height: 60%;
+  height: 45%;
   border-radius: 8px;
+  position: relative;
 }
 
 .lower-arm,
 .lower-leg {
-  height: 60%;
-  top: 40%;
+  height: 65%;
+  position: absolute;
+  bottom: -65%;
+  left: 0;
   border-radius: 8px;
 }
 
