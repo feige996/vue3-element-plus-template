@@ -359,7 +359,7 @@
           </div>
 
           <!-- 通用属性 -->
-          <div class="mt-4">
+          <div v-if="selectedElement.type !== 'dashed'" class="mt-4">
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">左偏移</label>
