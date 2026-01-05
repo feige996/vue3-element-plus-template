@@ -244,23 +244,23 @@ const getPartStyle = (part: string) => {
   }
 
   switch (part) {
-    case 'torso':
-      return {
-        ...baseStyle,
-        width: '50%',
-        height: '50%',
-        left: '25%',
-        top: '20%',
-        borderRadius: '10px',
-      }
     case 'head':
       return {
         ...baseStyle,
-        width: '30%',
-        height: '20%',
-        left: '35%',
+        width: '20%',
+        height: '15%',
+        left: '40%',
         top: '0%',
         borderRadius: '50%',
+      }
+    case 'torso':
+      return {
+        ...baseStyle,
+        width: '40%',
+        height: '40%',
+        left: '30%',
+        top: '15%',
+        borderRadius: '10px',
       }
     case 'left-arm':
     case 'right-arm':
@@ -269,7 +269,7 @@ const getPartStyle = (part: string) => {
         width: '12%',
         height: '40%',
         left: part === 'left-arm' ? '15%' : '73%',
-        top: '20%',
+        top: '15%',
         backgroundColor: 'transparent',
         border: 'none',
       }
@@ -280,7 +280,7 @@ const getPartStyle = (part: string) => {
         width: '15%',
         height: '40%',
         left: part === 'left-leg' ? '30%' : '55%',
-        top: '65%',
+        top: '55%',
         backgroundColor: 'transparent',
         border: 'none',
       }
@@ -531,13 +531,5 @@ const onMouseUp = () => {
   left: 0;
   box-sizing: border-box;
   border-radius: 8px;
-}
-
-.arm {
-  height: 45% !important;
-}
-
-.leg {
-  height: 45% !important;
 }
 </style>
