@@ -12,19 +12,31 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AIGCCanvas: typeof import('./src/components/AIGCCanvas.vue')['default']
+    AIGCCanvas: typeof import('./src/components/Canvas.vue')['default']
+    AssetList: typeof import('./src/components/AssetList.vue')['default']
+    Canvas: typeof import('./src/components/Canvas.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElInput: typeof import('element-plus/es')['ElInput']
+    PropertyPanel: typeof import('./src/components/PropertyPanel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    TestDemo: typeof import('./src/components/TestDemo.vue')['default']
+    TestDemo: typeof import('./src/components/Toolbar.vue')['default']
+    Toolbar: typeof import('./src/components/Toolbar.vue')['default']
   }
 }
 
 // For TSX support
 declare global {
-  const AIGCCanvas: typeof import('./src/components/AIGCCanvas.vue')['default']
+  const AIGCCanvas: typeof import('./src/components/Canvas.vue')['default']
+  const AssetList: typeof import('./src/components/AssetList.vue')['default']
+  const Canvas: typeof import('./src/components/Canvas.vue')['default']
   const ElButton: typeof import('element-plus/es')['ElButton']
+  const ElDialog: typeof import('element-plus/es')['ElDialog']
+  const ElInput: typeof import('element-plus/es')['ElInput']
+  const PropertyPanel: typeof import('./src/components/PropertyPanel.vue')['default']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']
-  const TestDemo: typeof import('./src/components/TestDemo.vue')['default']
+  const TestDemo: typeof import('./src/components/Toolbar.vue')['default']
+  const Toolbar: typeof import('./src/components/Toolbar.vue')['default']
 }
