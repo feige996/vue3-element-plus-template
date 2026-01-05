@@ -39,6 +39,25 @@
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          @click.stop="activeTool = activeTool === 'dashed' ? null : 'dashed'"
+          :class="{ 'ring-2 ring-blue-400': activeTool === 'dashed' }"
+        >
+          虚线框
+        </button>
+        <!-- 虚线框比例选择器 -->
+        <select
+          v-model="dashedAspectRatio"
+          class="px-2 py-1 border border-gray-300 rounded text-sm"
+          :disabled="activeTool !== 'dashed'"
+        >
+          <option :value="1">1:1</option>
+          <option :value="16 / 9">16:9</option>
+          <option :value="9 / 16">9:16</option>
+          <option :value="4 / 3">4:3</option>
+          <option :value="3 / 4">3:4</option>
+        </select>
+        <button
+          class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           @click.stop="activeTool = activeTool === 'number' ? null : 'number'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'number' }"
         >
@@ -95,9 +114,27 @@
             <!-- 矩形框元素 -->
             <div
               v-else-if="element.type === 'rect'"
-              class="w-full h-full border border-solid"
+              class="w-full h-full border-2"
               :style="{ borderColor: element.color, backgroundColor: 'transparent' }"
             ></div>
+            <!-- 虚线框元素 -->
+            <div
+              v-else-if="element.type === 'dashed'"
+              class="w-full h-full border-2 relative"
+              :style="{
+                borderColor: '#000000',
+                borderStyle: 'dashed',
+                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              }"
+            >
+              <!-- 截图缩略图 -->
+              <img
+                v-if="element.screenshot"
+                :src="element.screenshot"
+                alt="截图"
+                class="w-full h-full object-cover"
+              />
+            </div>
             <!-- 数字标元素 -->
             <div
               v-else-if="element.type === 'number'"
@@ -168,6 +205,21 @@
               height: `${tempRect.height}px`,
               borderColor: colorList[currentColorIndex],
               backgroundColor: 'transparent',
+            }"
+          ></div>
+
+          <!-- 临时绘制的虚线框 -->
+          <div
+            v-if="tempDashedRect && isDrawingDashed"
+            class="absolute border-2 border-dashed pointer-events-none"
+            :style="{
+              left: `${tempDashedRect.left}px`,
+              top: `${tempDashedRect.top}px`,
+              width: `${tempDashedRect.width}px`,
+              height: `${tempDashedRect.height}px`,
+              borderColor: '#000000',
+              borderStyle: 'dashed',
+              backgroundColor: 'rgba(0, 0, 0, 0.05)',
             }"
           ></div>
         </div>
@@ -247,6 +299,35 @@
             </div>
           </div>
 
+          <!-- 虚线框属性 -->
+          <div v-else-if="selectedElement.type === 'dashed'">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">截图预览</label>
+              <div class="border border-gray-300 rounded p-2 bg-gray-50">
+                <img
+                  v-if="selectedElement.screenshot"
+                  :src="selectedElement.screenshot"
+                  alt="截图预览"
+                  class="w-full h-auto rounded"
+                />
+                <div v-else class="text-center text-gray-400 py-4">暂无截图</div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">比例</label>
+              <select
+                v-model="selectedElement.aspectRatio"
+                class="w-full p-1 border border-gray-300 rounded"
+              >
+                <option :value="1">1:1</option>
+                <option :value="16 / 9">16:9</option>
+                <option :value="9 / 16">9:16</option>
+                <option :value="4 / 3">4:3</option>
+                <option :value="3 / 4">3:4</option>
+              </select>
+            </div>
+          </div>
+
           <!-- 通用属性 -->
           <div class="mt-4">
             <div class="grid grid-cols-2 gap-2">
@@ -288,7 +369,7 @@ interface Asset {
 // 画布元素数据类型定义
 interface CanvasElement {
   id: string
-  type: 'image' | 'text' | 'rect' | 'number'
+  type: 'image' | 'text' | 'rect' | 'dashed' | 'number'
   left: number
   top: number
   width?: number
@@ -298,7 +379,8 @@ interface CanvasElement {
   content?: string
   color?: string
   number?: number
-  aspectRatio?: number // 宽高比，仅用于图片元素
+  aspectRatio?: number // 宽高比，仅用于图片和虚线框元素
+  screenshot?: string // 截图数据，仅用于虚线框元素
 }
 
 // 资产列表数据
@@ -337,7 +419,10 @@ const canvasElements = ref<CanvasElement[]>([])
 const selectedElementId = ref<string | null>(null)
 
 // 活跃工具
-const activeTool = ref<'text' | 'rect' | 'number' | null>(null)
+const activeTool = ref<'text' | 'rect' | 'dashed' | 'number' | null>(null)
+
+// 虚线框比例
+const dashedAspectRatio = ref(1)
 
 // 编辑模式
 const editMode = ref(true)
@@ -368,6 +453,13 @@ const resizeStartSize = ref({ width: 0, height: 0 })
 // 矩形框绘制状态
 const drawStartPos = ref({ x: 0, y: 0 })
 const tempRect = ref<{ left: number; top: number; width: number; height: number } | null>(null)
+
+// 虚线框绘制状态
+const isDrawingDashed = ref(false)
+const dashedStartPos = ref({ x: 0, y: 0 })
+const tempDashedRect = ref<{ left: number; top: number; width: number; height: number } | null>(
+  null,
+)
 
 // 组件挂载时添加全局点击事件监听器
 onMounted(() => {
@@ -706,48 +798,93 @@ const onCanvasMouseDown = (event: MouseEvent) => {
     drawStartPos.value = { x, y }
     tempRect.value = { left: x, top: y, width: 0, height: 0 }
   }
+  // 如果当前工具是虚线框，开始绘制
+  else if (activeTool.value === 'dashed') {
+    isDrawingDashed.value = true
+    dashedStartPos.value = { x, y }
+    tempDashedRect.value = { left: x, top: y, width: 0, height: 0 }
+  }
 }
 
 // 画布鼠标移动处理
 const onCanvasMouseMove = (event: MouseEvent) => {
-  if (!canvasRef.value || !isDrawingRect.value || !tempRect.value) return
+  if (!canvasRef.value) return
 
   const rect = canvasRef.value.getBoundingClientRect()
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
 
-  // 计算矩形的左上角和宽高
-  const left = Math.min(drawStartPos.value.x, x)
-  const top = Math.min(drawStartPos.value.y, y)
-  const width = Math.abs(x - drawStartPos.value.x)
-  const height = Math.abs(y - drawStartPos.value.y)
+  // 更新矩形框绘制
+  if (isDrawingRect.value && tempRect.value) {
+    const left = Math.min(drawStartPos.value.x, x)
+    const top = Math.min(drawStartPos.value.y, y)
+    const width = Math.abs(x - drawStartPos.value.x)
+    const height = Math.abs(y - drawStartPos.value.y)
+    tempRect.value = { left, top, width, height }
+  }
 
-  // 更新临时矩形
-  tempRect.value = { left, top, width, height }
+  // 更新虚线框绘制
+  if (isDrawingDashed.value && tempDashedRect.value) {
+    // 计算拖拽轨迹作为对角线
+    const dx = x - dashedStartPos.value.x
+    const dy = y - dashedStartPos.value.y
+
+    // 根据选择的比例计算矩形大小
+    const aspectRatio = dashedAspectRatio.value
+    let width, height
+
+    if (Math.abs(dx) / Math.abs(dy) > aspectRatio) {
+      // 宽度主导
+      width = Math.abs(dx)
+      height = width / aspectRatio
+    } else {
+      // 高度主导
+      height = Math.abs(dy)
+      width = height * aspectRatio
+    }
+
+    // 确保至少有一定大小
+    width = Math.max(20, width)
+    height = Math.max(20, height)
+
+    // 计算左上角位置，保持中心点不变
+    const centerX = dashedStartPos.value.x + dx / 2
+    const centerY = dashedStartPos.value.y + dy / 2
+    const left = centerX - width / 2
+    const top = centerY - height / 2
+
+    tempDashedRect.value = { left, top, width, height }
+  }
 }
 
 // 画布鼠标释放处理
 const onCanvasMouseUp = () => {
-  if (!isDrawingRect.value || !tempRect.value) return
-
-  // 确保绘制的矩形有一定大小
-  if (tempRect.value.width > 5 && tempRect.value.height > 5) {
-    // 添加矩形元素到画布
-    addCanvasElement({
-      type: 'rect',
-      color: colorList.value[currentColorIndex.value],
-      left: tempRect.value.left,
-      top: tempRect.value.top,
-      width: tempRect.value.width,
-      height: tempRect.value.height,
-    })
-    // 更新颜色索引
-    currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
+  // 矩形框绘制结束
+  if (isDrawingRect.value && tempRect.value) {
+    if (tempRect.value.width > 5 && tempRect.value.height > 5) {
+      addCanvasElement({
+        type: 'rect',
+        color: colorList.value[currentColorIndex.value],
+        left: tempRect.value.left,
+        top: tempRect.value.top,
+        width: tempRect.value.width,
+        height: tempRect.value.height,
+      })
+      currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
+    }
+    isDrawingRect.value = false
+    tempRect.value = null
   }
 
-  // 重置绘制状态
-  isDrawingRect.value = false
-  tempRect.value = null
+  // 虚线框绘制结束
+  if (isDrawingDashed.value && tempDashedRect.value) {
+    if (tempDashedRect.value.width > 20 && tempDashedRect.value.height > 20) {
+      // 截图并发送给后端
+      captureAndSendScreenshot(tempDashedRect.value)
+    }
+    isDrawingDashed.value = false
+    tempDashedRect.value = null
+  }
 }
 
 // 画布点击处理
@@ -849,6 +986,74 @@ const updateTextContent = (event: Event, id: string) => {
   const element = canvasElements.value.find((el) => el.id === id)
   if (element && element.type === 'text') {
     element.content = (event.target as HTMLElement).innerText
+  }
+}
+
+// 截图并发送给后端
+const captureAndSendScreenshot = async (rect: {
+  left: number
+  top: number
+  width: number
+  height: number
+}) => {
+  if (!canvasRef.value) return
+
+  try {
+    // 使用 html2canvas 进行截图
+    const html2canvas = (await import('html2canvas')).default
+
+    // 创建一个临时的裁剪区域
+    const canvas = await html2canvas(canvasRef.value, {
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+    })
+
+    // 将 canvas 转换为 base64 图片
+    const imageData = canvas.toDataURL('image/png')
+
+    // 添加虚线框元素到画布
+    const dashedElement: CanvasElement = {
+      id: `dashed-${Date.now()}`,
+      type: 'dashed',
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      aspectRatio: dashedAspectRatio.value,
+      screenshot: imageData,
+    }
+    canvasElements.value.push(dashedElement)
+    selectedElementId.value = dashedElement.id
+
+    // 发送给后端（这里是一个示例，您需要根据实际后端接口调整）
+    console.log('截图数据:', {
+      image: imageData,
+      rect: rect,
+      aspectRatio: dashedAspectRatio.value,
+      timestamp: new Date().toISOString(),
+    })
+
+    // 示例：发送到后端 API（根据实际接口修改）
+    // const response = await fetch('/api/capture', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({
+    //     image: imageData,
+    //     rect: rect,
+    //     aspectRatio: dashedAspectRatio.value
+    //   })
+    // })
+    // const result = await response.json()
+    // console.log('后端返回结果:', result)
+  } catch (error) {
+    console.error('截图失败:', error)
   }
 }
 </script>
