@@ -1028,6 +1028,11 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
   canvasElements.value.push(newElement)
   selectedElementId.value = newElement.id
 
+  // 如果是文本框、矩形框或数字标，生成后取消工具激活状态
+  if (newElement.type === 'text' || newElement.type === 'rect' || newElement.type === 'number') {
+    activeTool.value = null
+  }
+
   // 如果是文本框，自动聚焦光标
   if (newElement.type === 'text') {
     nextTick(() => {
