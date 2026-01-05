@@ -19,93 +19,85 @@
       <div class="head" :style="getPartStyle('head')"></div>
 
       <!-- 左臂 -->
-      <div
-        class="arm left-arm"
-        :style="getPartStyle('left-arm')"
-        @mousedown.stop="onJointMouseDown($event, 'left-arm')"
-      >
+      <div class="arm left-arm" :style="getPartStyle('left-arm')">
         <div
           class="arm-part upper-arm"
           :style="{
             transform: `rotate(${leftArmRotation}deg)`,
             transformOrigin: 'top center',
           }"
+          @mousedown.stop="onJointMouseDown($event, 'left-arm')"
         >
           <div
             class="arm-part lower-arm"
             :style="{
               transform: `rotate(${leftLowerArmRotation}deg)`,
-              transformOrigin: 'bottom center',
+              transformOrigin: 'top center',
             }"
+            @mousedown.stop="onJointMouseDown($event, 'left-lower-arm')"
           ></div>
         </div>
       </div>
 
       <!-- 右臂 -->
-      <div
-        class="arm right-arm"
-        :style="getPartStyle('right-arm')"
-        @mousedown.stop="onJointMouseDown($event, 'right-arm')"
-      >
+      <div class="arm right-arm" :style="getPartStyle('right-arm')">
         <div
           class="arm-part upper-arm"
           :style="{
             transform: `rotate(${rightArmRotation}deg)`,
             transformOrigin: 'top center',
           }"
+          @mousedown.stop="onJointMouseDown($event, 'right-arm')"
         >
           <div
             class="arm-part lower-arm"
             :style="{
               transform: `rotate(${rightLowerArmRotation}deg)`,
-              transformOrigin: 'bottom center',
+              transformOrigin: 'top center',
             }"
+            @mousedown.stop="onJointMouseDown($event, 'right-lower-arm')"
           ></div>
         </div>
       </div>
 
       <!-- 左腿 -->
-      <div
-        class="leg left-leg"
-        :style="getPartStyle('left-leg')"
-        @mousedown.stop="onJointMouseDown($event, 'left-leg')"
-      >
+      <div class="leg left-leg" :style="getPartStyle('left-leg')">
         <div
           class="leg-part upper-leg"
           :style="{
             transform: `rotate(${leftLegRotation}deg)`,
             transformOrigin: 'top center',
           }"
+          @mousedown.stop="onJointMouseDown($event, 'left-leg')"
         >
           <div
             class="leg-part lower-leg"
             :style="{
               transform: `rotate(${leftLowerLegRotation}deg)`,
-              transformOrigin: 'bottom center',
+              transformOrigin: 'top center',
             }"
+            @mousedown.stop="onJointMouseDown($event, 'left-lower-leg')"
           ></div>
         </div>
       </div>
 
       <!-- 右腿 -->
-      <div
-        class="leg right-leg"
-        :style="getPartStyle('right-leg')"
-        @mousedown.stop="onJointMouseDown($event, 'right-leg')"
-      >
+      <div class="leg right-leg" :style="getPartStyle('right-leg')">
         <div
           class="leg-part upper-leg"
           :style="{
             transform: `rotate(${rightLegRotation}deg)`,
             transformOrigin: 'top center',
           }"
+          @mousedown.stop="onJointMouseDown($event, 'right-leg')"
         >
           <div
             class="leg-part lower-leg"
             :style="{
               transform: `rotate(${rightLowerLegRotation}deg)`,
-              transformOrigin: 'bottom center',
+              transformOrigin: 'top center',
             }"
+            @mousedown.stop="onJointMouseDown($event, 'right-lower-leg')"
           ></div>
         </div>
       </div>
@@ -531,16 +523,16 @@ const onMouseUp = () => {
 
 .upper-arm,
 .upper-leg {
-  height: 45%;
+  height: 60%;
   border-radius: 8px;
   position: relative;
 }
 
 .lower-arm,
 .lower-leg {
-  height: 65%;
+  height: 120%;
   position: absolute;
-  bottom: -65%;
+  bottom: -120%;
   left: 0;
   border-radius: 8px;
 }
