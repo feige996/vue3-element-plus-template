@@ -891,8 +891,22 @@ const onCanvasMouseUp = () => {
   // 虚线框绘制结束
   if (isDrawingDashed.value && tempDashedRect.value) {
     if (tempDashedRect.value.width > 20 && tempDashedRect.value.height > 20) {
-      // 截图并发送给后端
-      captureAndSendScreenshot(tempDashedRect.value)
+      // 立即创建虚线框元素，不等待截图完成
+      const dashedElement: CanvasElement = {
+        id: `dashed-${Date.now()}`,
+        type: 'dashed',
+        left: tempDashedRect.value.left,
+        top: tempDashedRect.value.top,
+        width: tempDashedRect.value.width,
+        height: tempDashedRect.value.height,
+        aspectRatio: dashedAspectRatio.value,
+        screenshot: undefined, // 初始无截图
+      }
+      canvasElements.value.push(dashedElement)
+      selectedElementId.value = dashedElement.id
+
+      // 在后台异步进行截图处理
+      captureAndSendScreenshot(tempDashedRect.value, dashedElement)
     }
     isDrawingDashed.value = false
     tempDashedRect.value = null
@@ -1002,12 +1016,15 @@ const updateTextContent = (event: Event, id: string) => {
 }
 
 // 截图并发送给后端
-const captureAndSendScreenshot = async (rect: {
-  left: number
-  top: number
-  width: number
-  height: number
-}) => {
+const captureAndSendScreenshot = async (
+  rect: {
+    left: number
+    top: number
+    width: number
+    height: number
+  },
+  dashedElement: CanvasElement,
+) => {
   if (!canvasRef.value) return
 
   try {
@@ -1028,19 +1045,8 @@ const captureAndSendScreenshot = async (rect: {
     // 将 canvas 转换为 base64 图片
     const imageData = canvas.toDataURL('image/png')
 
-    // 添加虚线框元素到画布
-    const dashedElement: CanvasElement = {
-      id: `dashed-${Date.now()}`,
-      type: 'dashed',
-      left: rect.left,
-      top: rect.top,
-      width: rect.width,
-      height: rect.height,
-      aspectRatio: dashedAspectRatio.value,
-      screenshot: imageData,
-    }
-    canvasElements.value.push(dashedElement)
-    selectedElementId.value = dashedElement.id
+    // 更新虚线框元素的截图数据
+    dashedElement.screenshot = imageData
 
     // 发送给后端（这里是一个示例，您需要根据实际后端接口调整）
     console.log('截图数据:', {
