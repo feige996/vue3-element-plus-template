@@ -25,21 +25,21 @@
       <div class="h-12 bg-white border-b border-gray-200 flex items-center px-4 space-x-2">
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = activeTool === 'text' ? null : 'text'"
+          @click.stop="activeTool = activeTool === 'text' ? null : 'text'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'text' }"
         >
           文本框
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = activeTool === 'rect' ? null : 'rect'"
+          @click.stop="activeTool = activeTool === 'rect' ? null : 'rect'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'rect' }"
         >
           矩形框
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = activeTool === 'number' ? null : 'number'"
+          @click.stop="activeTool = activeTool === 'number' ? null : 'number'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'number' }"
         >
           数字标
@@ -47,7 +47,7 @@
         <div class="w-px h-6 bg-gray-300 mx-2"></div>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="editMode = !editMode"
+          @click.stop="editMode = !editMode"
           :class="{ 'ring-2 ring-blue-400': editMode }"
         >
           {{ editMode ? '编辑' : '浏览' }}
@@ -258,7 +258,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // 资产数据类型定义
 interface Asset {
@@ -345,6 +345,30 @@ const resizeDirection = ref<'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 
 const dragStartPos = ref({ x: 0, y: 0 })
 const resizeStartPos = ref({ x: 0, y: 0 })
 const resizeStartSize = ref({ width: 0, height: 0 })
+
+// 组件挂载时添加全局点击事件监听器
+onMounted(() => {
+  document.addEventListener('click', handleGlobalClick)
+})
+
+// 组件卸载时移除全局点击事件监听器
+onUnmounted(() => {
+  document.removeEventListener('click', handleGlobalClick)
+})
+
+// 全局点击事件处理，点击画布以外区域取消工具激活
+const handleGlobalClick = (event: MouseEvent) => {
+  // 如果没有激活的工具，不处理
+  if (!activeTool.value) return
+
+  // 如果画布存在，检查点击是否发生在画布以外
+  if (canvasRef.value) {
+    const isClickInsideCanvas = canvasRef.value.contains(event.target as Node)
+    if (!isClickInsideCanvas) {
+      activeTool.value = null
+    }
+  }
+}
 
 // 拖拽开始处理
 const onDragStart = (event: DragEvent, asset: Asset) => {
