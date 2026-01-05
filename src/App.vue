@@ -372,6 +372,32 @@
             </div>
           </div>
 
+          <!-- 图片属性 -->
+          <div v-else-if="selectedElement.type === 'image'">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">名称</label>
+              <div class="text-sm text-gray-600">{{ selectedElement.name }}</div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">宽度</label>
+                <input
+                  type="number"
+                  v-model.number="selectedElement.width"
+                  class="w-full p-1 border border-gray-300 rounded"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">高度</label>
+                <input
+                  type="number"
+                  v-model.number="selectedElement.height"
+                  class="w-full p-1 border border-gray-300 rounded"
+                />
+              </div>
+            </div>
+          </div>
+
           <!-- 通用属性 -->
           <div v-if="selectedElement.type !== 'dashed'" class="mt-4">
             <div class="grid grid-cols-2 gap-2">
