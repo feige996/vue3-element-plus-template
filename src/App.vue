@@ -162,6 +162,16 @@
       <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-60px)]">
         <!-- 属性面板内容 -->
         <div v-if="selectedElement">
+          <!-- 删除按钮 -->
+          <div class="mb-4">
+            <button
+              class="w-full px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+              @click="deleteElement"
+            >
+              删除元素
+            </button>
+          </div>
+
           <!-- 矩形框属性 -->
           <div v-if="selectedElement.type === 'rect'">
             <div class="mb-4">
@@ -620,13 +630,14 @@ const onElementClick = (event: MouseEvent) => {
       currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
       break
     case 'number':
+      const numberSize = 32
       addCanvasElement({
         type: 'number',
         number: currentNumber.value,
-        left,
-        top,
-        width: 32,
-        height: 32,
+        left: left - numberSize / 2,
+        top: top - numberSize / 2,
+        width: numberSize,
+        height: numberSize,
       })
       // 更新数字标序号
       currentNumber.value++
@@ -667,13 +678,14 @@ const onCanvasClick = (event: MouseEvent) => {
       currentColorIndex.value = (currentColorIndex.value + 1) % colorList.value.length
       break
     case 'number':
+      const numberSize = 32
       addCanvasElement({
         type: 'number',
         number: currentNumber.value,
-        left,
-        top,
-        width: 32,
-        height: 32,
+        left: left - numberSize / 2,
+        top: top - numberSize / 2,
+        width: numberSize,
+        height: numberSize,
       })
       // 更新数字标序号
       currentNumber.value++
@@ -706,6 +718,20 @@ const selectElement = (id: string) => {
 const selectedElement = computed(() => {
   return canvasElements.value.find((el) => el.id === selectedElementId.value) || null
 })
+
+// 删除元素
+const deleteElement = () => {
+  if (!selectedElementId.value) return
+
+  // 从画布元素列表中移除当前选中的元素
+  const index = canvasElements.value.findIndex((el) => el.id === selectedElementId.value)
+  if (index !== -1) {
+    canvasElements.value.splice(index, 1)
+  }
+
+  // 清空选中状态
+  selectedElementId.value = null
+}
 
 // 获取元素样式
 const getElementStyle = (element: CanvasElement) => {
