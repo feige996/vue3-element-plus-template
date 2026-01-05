@@ -110,7 +110,7 @@
             <!-- 矩形框元素 -->
             <div
               v-else-if="element.type === 'rect'"
-              class="w-full h-full border-2"
+              class="w-full h-full border-2 border-solid"
               :style="{ borderColor: element.color, backgroundColor: 'transparent' }"
             ></div>
             <!-- 虚线框元素 -->
