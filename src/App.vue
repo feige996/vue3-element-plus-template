@@ -42,25 +42,6 @@
         </button>
         <button
           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          @click="activeTool = activeTool === 'dashed' ? null : 'dashed'"
-          :class="{ 'ring-2 ring-blue-400': activeTool === 'dashed' }"
-        >
-          虚线框
-        </button>
-        <!-- 虚线框比例选择器 -->
-        <select
-          v-model="dashedAspectRatio"
-          class="px-2 py-1 border border-gray-300 rounded text-sm"
-          :disabled="activeTool !== 'dashed'"
-        >
-          <option :value="1">1:1</option>
-          <option :value="16 / 9">16:9</option>
-          <option :value="9 / 16">9:16</option>
-          <option :value="4 / 3">4:3</option>
-          <option :value="3 / 4">3:4</option>
-        </select>
-        <button
-          class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           @click="activeTool = activeTool === 'number' ? null : 'number'"
           :class="{ 'ring-2 ring-blue-400': activeTool === 'number' }"
         >
@@ -210,21 +191,6 @@
               backgroundColor: 'transparent',
             }"
           ></div>
-
-          <!-- 临时绘制的虚线框 -->
-          <div
-            v-if="tempDashedRect && isDrawingDashed"
-            class="absolute border-2 border-dashed pointer-events-none"
-            :style="{
-              left: `${tempDashedRect.left}px`,
-              top: `${tempDashedRect.top}px`,
-              width: `${tempDashedRect.width}px`,
-              height: `${tempDashedRect.height}px`,
-              borderColor: '#000000',
-              borderStyle: 'dashed',
-              backgroundColor: 'rgba(0, 0, 0, 0.05)',
-            }"
-          ></div>
         </div>
       </div>
     </div>
@@ -305,22 +271,11 @@
           <!-- 虚线框属性 -->
           <div v-else-if="selectedElement.type === 'dashed'">
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">截图预览</label>
-              <div class="border border-gray-300 rounded p-2 bg-gray-50">
-                <img
-                  v-if="selectedElement.screenshot"
-                  :src="selectedElement.screenshot"
-                  alt="截图预览"
-                  class="w-full h-auto rounded"
-                />
-                <div v-else class="text-center text-gray-400 py-4">暂无截图</div>
-              </div>
-            </div>
-            <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-1">比例</label>
               <select
                 v-model="selectedElement.aspectRatio"
                 class="w-full p-1 border border-gray-300 rounded"
+                @change="updateDashedHeight"
               >
                 <option :value="1">1:1</option>
                 <option :value="16 / 9">16:9</option>
@@ -328,6 +283,54 @@
                 <option :value="4 / 3">4:3</option>
                 <option :value="3 / 4">3:4</option>
               </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">左偏移</label>
+                <input
+                  type="number"
+                  v-model.number="selectedElement.left"
+                  class="w-full p-1 border border-gray-300 rounded"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">上偏移</label>
+                <input
+                  type="number"
+                  v-model.number="selectedElement.top"
+                  class="w-full p-1 border border-gray-300 rounded"
+                />
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">宽度</label>
+              <input
+                type="number"
+                v-model.number="selectedElement.width"
+                class="w-full p-1 border border-gray-300 rounded"
+                @input="updateDashedHeight"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">高度（自适应）</label>
+              <input
+                type="number"
+                :value="(selectedElement.width || 100) / (selectedElement.aspectRatio || 1)"
+                class="w-full p-1 border border-gray-300 rounded bg-gray-50"
+                readonly
+              />
+            </div>
+
+            <div class="mt-6">
+              <button
+                class="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                @click="captureAndSendScreenshot(selectedElement)"
+              >
+                重新截图
+              </button>
             </div>
           </div>
 
@@ -422,13 +425,13 @@ const canvasElements = ref<CanvasElement[]>([])
 const selectedElementId = ref<string | null>(null)
 
 // 活跃工具
-const activeTool = ref<'text' | 'rect' | 'dashed' | 'number' | null>(null)
-
-// 虚线框比例
-const dashedAspectRatio = ref(1)
+const activeTool = ref<'text' | 'rect' | 'number' | null>(null)
 
 // 编辑模式
 const editMode = ref(true)
+
+// 主虚线框引用
+const mainDashedElement = ref<CanvasElement | null>(null)
 
 // 画布引用
 const canvasRef = ref<HTMLElement | null>(null)
@@ -457,25 +460,51 @@ const resizeStartSize = ref({ width: 0, height: 0 })
 const drawStartPos = ref({ x: 0, y: 0 })
 const tempRect = ref<{ left: number; top: number; width: number; height: number } | null>(null)
 
-// 虚线框绘制状态
-const isDrawingDashed = ref(false)
-const dashedStartPos = ref({ x: 0, y: 0 })
-const tempDashedRect = ref<{ left: number; top: number; width: number; height: number } | null>(
-  null,
-)
-
 // 工具栏引用
 const toolbarRef = ref<HTMLElement | null>(null)
 
 // 组件挂载时添加全局点击事件监听器
 onMounted(() => {
   document.addEventListener('click', handleGlobalClick)
+
+  // 初始化时自动生成一个1:1比例的虚线框
+  initializeDashedElement()
 })
 
 // 组件卸载时移除全局点击事件监听器
 onUnmounted(() => {
   document.removeEventListener('click', handleGlobalClick)
 })
+
+// 初始化虚线框
+const initializeDashedElement = () => {
+  if (!canvasRef.value) return
+
+  // 获取画布尺寸
+  const rect = canvasRef.value.getBoundingClientRect()
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+  const size = 200
+
+  // 创建默认的1:1虚线框
+  const dashedElement: CanvasElement = {
+    id: 'main-dashed-element',
+    type: 'dashed',
+    left: centerX - size / 2,
+    top: centerY - size / 2,
+    width: size,
+    height: size,
+    aspectRatio: 1,
+    screenshot: undefined,
+  }
+
+  canvasElements.value.push(dashedElement)
+  mainDashedElement.value = dashedElement
+  selectedElementId.value = dashedElement.id
+
+  // 自动截图
+  captureAndSendScreenshot(dashedElement)
+}
 
 // 全局点击事件处理，点击画布以外区域取消工具激活
 const handleGlobalClick = (event: MouseEvent) => {
@@ -810,12 +839,6 @@ const onCanvasMouseDown = (event: MouseEvent) => {
     drawStartPos.value = { x, y }
     tempRect.value = { left: x, top: y, width: 0, height: 0 }
   }
-  // 如果当前工具是虚线框，开始绘制
-  else if (activeTool.value === 'dashed') {
-    isDrawingDashed.value = true
-    dashedStartPos.value = { x, y }
-    tempDashedRect.value = { left: x, top: y, width: 0, height: 0 }
-  }
 }
 
 // 画布鼠标移动处理
@@ -833,39 +856,6 @@ const onCanvasMouseMove = (event: MouseEvent) => {
     const width = Math.abs(x - drawStartPos.value.x)
     const height = Math.abs(y - drawStartPos.value.y)
     tempRect.value = { left, top, width, height }
-  }
-
-  // 更新虚线框绘制
-  if (isDrawingDashed.value && tempDashedRect.value) {
-    // 计算拖拽轨迹作为对角线
-    const dx = x - dashedStartPos.value.x
-    const dy = y - dashedStartPos.value.y
-
-    // 根据选择的比例计算矩形大小
-    const aspectRatio = dashedAspectRatio.value
-    let width, height
-
-    if (Math.abs(dx) / Math.abs(dy) > aspectRatio) {
-      // 宽度主导
-      width = Math.abs(dx)
-      height = width / aspectRatio
-    } else {
-      // 高度主导
-      height = Math.abs(dy)
-      width = height * aspectRatio
-    }
-
-    // 确保至少有一定大小
-    width = Math.max(20, width)
-    height = Math.max(20, height)
-
-    // 计算左上角位置，保持中心点不变
-    const centerX = dashedStartPos.value.x + dx / 2
-    const centerY = dashedStartPos.value.y + dy / 2
-    const left = centerX - width / 2
-    const top = centerY - height / 2
-
-    tempDashedRect.value = { left, top, width, height }
   }
 }
 
@@ -886,30 +876,6 @@ const onCanvasMouseUp = () => {
     }
     isDrawingRect.value = false
     tempRect.value = null
-  }
-
-  // 虚线框绘制结束
-  if (isDrawingDashed.value && tempDashedRect.value) {
-    if (tempDashedRect.value.width > 20 && tempDashedRect.value.height > 20) {
-      // 立即创建虚线框元素，不等待截图完成
-      const dashedElement: CanvasElement = {
-        id: `dashed-${Date.now()}`,
-        type: 'dashed',
-        left: tempDashedRect.value.left,
-        top: tempDashedRect.value.top,
-        width: tempDashedRect.value.width,
-        height: tempDashedRect.value.height,
-        aspectRatio: dashedAspectRatio.value,
-        screenshot: undefined, // 初始无截图
-      }
-      canvasElements.value.push(dashedElement)
-      selectedElementId.value = dashedElement.id
-
-      // 在后台异步进行截图处理
-      captureAndSendScreenshot(tempDashedRect.value, dashedElement)
-    }
-    isDrawingDashed.value = false
-    tempDashedRect.value = null
   }
 }
 
@@ -981,6 +947,16 @@ const selectedElement = computed(() => {
   return canvasElements.value.find((el) => el.id === selectedElementId.value) || null
 })
 
+// 更新虚线框高度
+const updateDashedHeight = () => {
+  if (!selectedElement.value) return
+
+  // 根据宽度和比例自动计算高度
+  const width = selectedElement.value.width || 100
+  const aspectRatio = selectedElement.value.aspectRatio || 1
+  selectedElement.value.height = width / aspectRatio
+}
+
 // 删除元素
 const deleteElement = () => {
   if (!selectedElementId.value) return
@@ -1016,20 +992,20 @@ const updateTextContent = (event: Event, id: string) => {
 }
 
 // 截图并发送给后端
-const captureAndSendScreenshot = async (
-  rect: {
-    left: number
-    top: number
-    width: number
-    height: number
-  },
-  dashedElement: CanvasElement,
-) => {
+const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
   if (!canvasRef.value) return
 
   try {
     // 使用 html2canvas 进行截图
     const html2canvas = (await import('html2canvas')).default
+
+    // 从虚线框元素中获取截图区域
+    const rect = {
+      left: dashedElement.left,
+      top: dashedElement.top,
+      width: dashedElement.width || 0,
+      height: dashedElement.height || 0,
+    }
 
     // 创建一个临时的裁剪区域
     const canvas = await html2canvas(canvasRef.value, {
@@ -1052,7 +1028,7 @@ const captureAndSendScreenshot = async (
     console.log('截图数据:', {
       image: imageData,
       rect: rect,
-      aspectRatio: dashedAspectRatio.value,
+      aspectRatio: dashedElement.aspectRatio,
       timestamp: new Date().toISOString(),
     })
 
