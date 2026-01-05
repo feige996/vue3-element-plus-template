@@ -68,7 +68,7 @@
             :key="element.id"
             :class="['absolute', { 'ring-2 ring-blue-400': selectedElementId === element.id }]"
             :style="getElementStyle(element)"
-            @click.stop="selectElement(element.id)"
+            @click.stop="activeTool ? undefined : selectElement(element.id)"
             @mousedown="onElementMouseDown($event, element)"
           >
             <!-- 图片元素 -->
@@ -269,6 +269,7 @@ interface CanvasElement {
   content?: string
   color?: string
   number?: number
+  aspectRatio?: number // 宽高比，仅用于图片元素
 }
 
 // 资产列表数据
@@ -346,6 +347,9 @@ const onElementMouseDown = (event: MouseEvent, element: CanvasElement) => {
   if (!editMode.value) return
   event.stopPropagation()
 
+  // 如果有活跃工具，不执行拖拽操作，允许创建新元素
+  if (activeTool.value) return
+
   // 如果点击的是元素内容而不是缩放控制点，开始拖拽
   if (event.target instanceof HTMLElement && !event.target.classList.contains('resize-handle')) {
     isDragging.value = true
@@ -414,40 +418,123 @@ const onResizeMove = (event: MouseEvent) => {
   const startWidth = resizeStartSize.value.width
   const startHeight = resizeStartSize.value.height
 
+  // 保存原始宽高比
+  const aspectRatio = element.aspectRatio || startWidth / startHeight
+
   switch (resizeDirection.value) {
     case 'nw':
-      element.width = Math.max(10, startWidth - deltaX)
-      element.height = Math.max(10, startHeight - deltaY)
-      element.left += deltaX
-      element.top += deltaY
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newWidth = Math.max(10, startWidth - deltaX)
+        const newHeight = newWidth / aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+        element.left += deltaX
+        element.top += newHeight - startHeight
+      } else {
+        // 其他元素自由缩放
+        element.width = Math.max(10, startWidth - deltaX)
+        element.height = Math.max(10, startHeight - deltaY)
+        element.left += deltaX
+        element.top += deltaY
+      }
       break
     case 'n':
-      element.height = Math.max(10, startHeight - deltaY)
-      element.top += deltaY
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newHeight = Math.max(10, startHeight - deltaY)
+        const newWidth = newHeight * aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+        element.top += deltaY
+        element.left += (startWidth - newWidth) / 2
+      } else {
+        // 其他元素自由缩放
+        element.height = Math.max(10, startHeight - deltaY)
+        element.top += deltaY
+      }
       break
     case 'ne':
-      element.width = Math.max(10, startWidth + deltaX)
-      element.height = Math.max(10, startHeight - deltaY)
-      element.top += deltaY
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newWidth = Math.max(10, startWidth + deltaX)
+        const newHeight = newWidth / aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+        element.top += newHeight - startHeight
+      } else {
+        // 其他元素自由缩放
+        element.width = Math.max(10, startWidth + deltaX)
+        element.height = Math.max(10, startHeight - deltaY)
+        element.top += deltaY
+      }
       break
     case 'e':
-      element.width = Math.max(10, startWidth + deltaX)
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newWidth = Math.max(10, startWidth + deltaX)
+        const newHeight = newWidth / aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+      } else {
+        // 其他元素自由缩放
+        element.width = Math.max(10, startWidth + deltaX)
+      }
       break
     case 'se':
-      element.width = Math.max(10, startWidth + deltaX)
-      element.height = Math.max(10, startHeight + deltaY)
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newWidth = Math.max(10, startWidth + deltaX)
+        const newHeight = newWidth / aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+      } else {
+        // 其他元素自由缩放
+        element.width = Math.max(10, startWidth + deltaX)
+        element.height = Math.max(10, startHeight + deltaY)
+      }
       break
     case 's':
-      element.height = Math.max(10, startHeight + deltaY)
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newHeight = Math.max(10, startHeight + deltaY)
+        const newWidth = newHeight * aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+        element.left += (startWidth - newWidth) / 2
+      } else {
+        // 其他元素自由缩放
+        element.height = Math.max(10, startHeight + deltaY)
+      }
       break
     case 'sw':
-      element.width = Math.max(10, startWidth - deltaX)
-      element.height = Math.max(10, startHeight + deltaY)
-      element.left += deltaX
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newWidth = Math.max(10, startWidth - deltaX)
+        const newHeight = newWidth / aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+        element.left += deltaX
+      } else {
+        // 其他元素自由缩放
+        element.width = Math.max(10, startWidth - deltaX)
+        element.height = Math.max(10, startHeight + deltaY)
+        element.left += deltaX
+      }
       break
     case 'w':
-      element.width = Math.max(10, startWidth - deltaX)
-      element.left += deltaX
+      if (element.type === 'image' && element.aspectRatio) {
+        // 图片保持宽高比
+        const newWidth = Math.max(10, startWidth - deltaX)
+        const newHeight = newWidth / aspectRatio
+        element.width = newWidth
+        element.height = newHeight
+        element.left += deltaX
+      } else {
+        // 其他元素自由缩放
+        element.width = Math.max(10, startWidth - deltaX)
+        element.left += deltaX
+      }
       break
   }
 }
@@ -474,16 +561,27 @@ const onDrop = (event: DragEvent) => {
     const left = event.clientX - rect.left
     const top = event.clientY - rect.top
 
-    // 添加图片元素到画布
-    addCanvasElement({
-      type: 'image',
-      url: asset.url,
-      name: asset.name,
-      left,
-      top,
-      width: 100,
-      height: 100,
-    })
+    // 创建临时图片对象获取原始宽高比
+    const img = new Image()
+    img.onload = () => {
+      const aspectRatio = img.width / img.height
+      // 设置初始宽度为200，高度根据宽高比计算
+      const initialWidth = 200
+      const initialHeight = initialWidth / aspectRatio
+
+      // 添加图片元素到画布
+      addCanvasElement({
+        type: 'image',
+        url: asset.url,
+        name: asset.name,
+        left,
+        top,
+        width: initialWidth,
+        height: initialHeight,
+        aspectRatio, // 保存宽高比
+      })
+    }
+    img.src = asset.url
   }
 }
 
@@ -547,7 +645,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
   }
   canvasElements.value.push(newElement)
   selectedElementId.value = newElement.id
-  activeTool.value = null
+  // 不再自动重置activeTool，保持工具激活状态
 }
 
 // 选择元素
