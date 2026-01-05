@@ -101,8 +101,9 @@
             <!-- 文本框元素 -->
             <div
               v-else-if="element.type === 'text'"
+              :data-element-id="element.id"
               contenteditable="true"
-              class="w-full h-full p-2 outline-none"
+              class="w-full h-full p-2 outline-none cursor-text"
               @input="updateTextContent($event, element.id)"
             >
               {{ element.content }}
@@ -972,7 +973,16 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
   }
   canvasElements.value.push(newElement)
   selectedElementId.value = newElement.id
-  // 不再自动重置activeTool，保持工具激活状态
+
+  // 如果是文本框，自动聚焦光标
+  if (newElement.type === 'text') {
+    nextTick(() => {
+      const el = document.querySelector(`[data-element-id="${newElement.id}"]`) as HTMLElement
+      if (el) {
+        el.focus()
+      }
+    })
+  }
 }
 
 // 选择元素
