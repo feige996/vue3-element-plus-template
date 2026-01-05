@@ -476,7 +476,7 @@ const isScreenshotLoading = ref(false)
 const canvasRef = ref<HTMLElement | null>(null)
 
 // 颜色列表
-const colorList = ref<string[]>(['red', 'green', 'blue', 'yellow', 'purple', 'black', 'white'])
+const colorList = ref<string[]>(['red', 'green', 'blue', 'yellow', 'purple', 'black'])
 
 // 当前颜色索引
 const currentColorIndex = ref(0)
