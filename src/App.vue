@@ -104,21 +104,13 @@
             <!-- 虚线框元素 -->
             <div
               v-else-if="element.type === 'dashed'"
-              class="w-full h-full border-2 relative"
+              class="w-full h-full border-2"
               :style="{
                 borderColor: '#000000',
                 borderStyle: 'dashed',
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                backgroundColor: 'transparent',
               }"
-            >
-              <!-- 截图缩略图 -->
-              <img
-                v-if="element.screenshot"
-                :src="element.screenshot"
-                alt="截图"
-                class="w-full h-full object-cover"
-              />
-            </div>
+            ></div>
             <!-- 数字标元素 -->
             <div
               v-else-if="element.type === 'number'"
