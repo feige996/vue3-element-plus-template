@@ -96,7 +96,7 @@
               :src="element.url"
               :alt="element.name"
               class="w-full h-full object-cover"
-              @click.stop="activeTool ? onElementClick($event) : undefined"
+              draggable="false"
             />
             <!-- 文本框元素 -->
             <div
