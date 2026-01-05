@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 interface Props {
   left: number
@@ -107,7 +107,7 @@ interface Props {
   pose: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   left: 0,
   top: 0,
   width: 150,
@@ -130,13 +130,66 @@ const rightArmRotation = ref(0)
 const leftLegRotation = ref(0)
 const rightLegRotation = ref(0)
 
+// 预设姿势定义
+const poseDefinitions = {
+  standing: {
+    leftArmRotation: 0,
+    rightArmRotation: 0,
+    leftLegRotation: 0,
+    rightLegRotation: 0,
+  },
+  waving: {
+    leftArmRotation: 0,
+    rightArmRotation: 45,
+    leftLegRotation: 0,
+    rightLegRotation: 0,
+  },
+  sitting: {
+    leftArmRotation: 15,
+    rightArmRotation: 15,
+    leftLegRotation: -90,
+    rightLegRotation: -90,
+  },
+  thinking: {
+    leftArmRotation: 45,
+    rightArmRotation: 0,
+    leftLegRotation: 0,
+    rightLegRotation: 0,
+  },
+  running: {
+    leftArmRotation: 60,
+    rightArmRotation: -60,
+    leftLegRotation: -45,
+    rightLegRotation: 45,
+  },
+  jumping: {
+    leftArmRotation: -30,
+    rightArmRotation: -30,
+    leftLegRotation: 45,
+    rightLegRotation: 45,
+  },
+}
+
+watch(
+  () => props.pose,
+  (newPose) => {
+    const pose =
+      poseDefinitions[newPose as keyof typeof poseDefinitions] || poseDefinitions.standing
+    leftArmRotation.value = pose.leftArmRotation
+    rightArmRotation.value = pose.rightArmRotation
+    leftLegRotation.value = pose.leftLegRotation
+    rightLegRotation.value = pose.rightLegRotation
+  },
+  { immediate: true },
+)
+
 // 关节点定义
 const joints = ref([
   { id: 'head', x: 50, y: 15 },
   { id: 'left-arm', x: 25, y: 30 },
   { id: 'right-arm', x: 75, y: 30 },
-  { id: 'left-leg', x: 35, y: 75 },
-  { id: 'right-leg', x: 65, y: 75 },
+  { id: 'left-leg', x: 40, y: 75 },
+  { id: 'right-leg', x: 60, y: 75 },
 ])
 
 // 人物样式
@@ -179,9 +232,9 @@ const getPartStyle = (part: string) => {
     case 'right-arm':
       return {
         ...baseStyle,
-        width: '20%',
+        width: '12%',
         height: '40%',
-        left: part === 'left-arm' ? '5%' : '75%',
+        left: part === 'left-arm' ? '15%' : '73%',
         top: '20%',
         backgroundColor: 'transparent',
         border: 'none',
@@ -190,9 +243,9 @@ const getPartStyle = (part: string) => {
     case 'right-leg':
       return {
         ...baseStyle,
-        width: '20%',
+        width: '15%',
         height: '40%',
-        left: part === 'left-leg' ? '25%' : '55%',
+        left: part === 'left-leg' ? '30%' : '55%',
         top: '65%',
         backgroundColor: 'transparent',
         border: 'none',
@@ -218,9 +271,79 @@ const getJointStyle = (joint: { id: string; x: number; y: number }) => {
   }
 }
 
+// 拖拽旋转状态
+const isRotating = ref(false)
+const currentJoint = ref<string | null>(null)
+const startMousePos = ref({ x: 0, y: 0 })
+const startRotation = ref(0)
+
 // 关节点鼠标按下事件
 const onJointMouseDown = (event: MouseEvent, jointId: string) => {
+  event.stopPropagation()
+  isRotating.value = true
+  currentJoint.value = jointId
+  startMousePos.value = { x: event.clientX, y: event.clientY }
+
+  // 记录初始旋转角度
+  switch (jointId) {
+    case 'left-arm':
+      startRotation.value = leftArmRotation.value
+      break
+    case 'right-arm':
+      startRotation.value = rightArmRotation.value
+      break
+    case 'left-leg':
+      startRotation.value = leftLegRotation.value
+      break
+    case 'right-leg':
+      startRotation.value = rightLegRotation.value
+      break
+  }
+
+  // 添加全局鼠标事件监听
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+  document.addEventListener('mouseleave', onMouseUp)
+
   emit('jointMousedown', event, jointId)
+}
+
+// 鼠标移动事件，计算旋转角度
+const onMouseMove = (event: MouseEvent) => {
+  if (!isRotating.value || !currentJoint.value) return
+
+  const deltaX = event.clientX - startMousePos.value.x
+  const deltaY = event.clientY - startMousePos.value.y
+
+  // 计算旋转角度（简化计算，实际可以根据关节点位置计算）
+  const rotationDelta = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+
+  // 更新对应肢体的旋转角度
+  switch (currentJoint.value) {
+    case 'left-arm':
+      leftArmRotation.value = startRotation.value + rotationDelta * 0.5
+      break
+    case 'right-arm':
+      rightArmRotation.value = startRotation.value + rotationDelta * 0.5
+      break
+    case 'left-leg':
+      leftLegRotation.value = startRotation.value + rotationDelta * 0.5
+      break
+    case 'right-leg':
+      rightLegRotation.value = startRotation.value + rotationDelta * 0.5
+      break
+  }
+}
+
+// 鼠标释放事件，结束旋转
+const onMouseUp = () => {
+  isRotating.value = false
+  currentJoint.value = null
+
+  // 移除全局鼠标事件监听
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mouseup', onMouseUp)
+  document.removeEventListener('mouseleave', onMouseUp)
 }
 </script>
 
