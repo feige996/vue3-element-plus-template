@@ -648,8 +648,8 @@ const onResizeMove = (event: MouseEvent) => {
 
   switch (resizeDirection.value) {
     case 'nw':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newWidth = Math.max(10, startWidth - deltaX)
         const newHeight = newWidth / aspectRatio
         element.width = newWidth
@@ -665,8 +665,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 'n':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newHeight = Math.max(10, startHeight - deltaY)
         const newWidth = newHeight * aspectRatio
         element.width = newWidth
@@ -680,8 +680,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 'ne':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newWidth = Math.max(10, startWidth + deltaX)
         const newHeight = newWidth / aspectRatio
         element.width = newWidth
@@ -695,8 +695,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 'e':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newWidth = Math.max(10, startWidth + deltaX)
         const newHeight = newWidth / aspectRatio
         element.width = newWidth
@@ -707,8 +707,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 'se':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newWidth = Math.max(10, startWidth + deltaX)
         const newHeight = newWidth / aspectRatio
         element.width = newWidth
@@ -720,8 +720,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 's':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newHeight = Math.max(10, startHeight + deltaY)
         const newWidth = newHeight * aspectRatio
         element.width = newWidth
@@ -733,8 +733,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 'sw':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newWidth = Math.max(10, startWidth - deltaX)
         const newHeight = newWidth / aspectRatio
         element.width = newWidth
@@ -748,8 +748,8 @@ const onResizeMove = (event: MouseEvent) => {
       }
       break
     case 'w':
-      if (element.type === 'image' && element.aspectRatio) {
-        // 图片保持宽高比
+      if ((element.type === 'image' || element.type === 'dashed') && element.aspectRatio) {
+        // 图片和虚线框保持宽高比
         const newWidth = Math.max(10, startWidth - deltaX)
         const newHeight = newWidth / aspectRatio
         element.width = newWidth
@@ -994,6 +994,15 @@ const updateDashedHeight = () => {
 // 删除元素
 const deleteElement = () => {
   if (!selectedElementId.value) return
+
+  // 获取要删除的元素
+  const elementToDelete = canvasElements.value.find((el) => el.id === selectedElementId.value)
+  if (elementToDelete) {
+    // 如果是主虚线框，重置引用
+    if (mainDashedElement.value?.id === elementToDelete.id) {
+      mainDashedElement.value = null
+    }
+  }
 
   // 从画布元素列表中移除当前选中的元素
   const index = canvasElements.value.findIndex((el) => el.id === selectedElementId.value)
