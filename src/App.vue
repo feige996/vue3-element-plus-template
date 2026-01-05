@@ -104,10 +104,11 @@
               :data-element-id="element.id"
               contenteditable="true"
               class="w-full h-full p-2 outline-none cursor-text"
+              :placeholder="'输入文字'"
               @input="updateTextContent($event, element.id)"
-            >
-              {{ element.content }}
-            </div>
+              @compositionstart="onCompositionStart"
+              @compositionend="onCompositionEnd($event, element.id)"
+            ></div>
             <!-- 矩形框元素 -->
             <div
               v-else-if="element.type === 'rect'"
@@ -399,6 +400,15 @@
   </div>
 </template>
 
+<style scoped>
+/* contenteditable元素的placeholder样式 */
+:deep([contenteditable=true]):empty:before {
+  content: attr(placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+</style>
+
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
@@ -472,6 +482,9 @@ const mainDashedElement = ref<CanvasElement | null>(null)
 
 // 截图loading状态
 const isScreenshotLoading = ref(false)
+
+// 中文输入状态
+const isComposing = ref(false)
 
 // 画布引用
 const canvasRef = ref<HTMLElement | null>(null)
@@ -828,7 +841,7 @@ const onElementClick = (event: MouseEvent) => {
     case 'text':
       addCanvasElement({
         type: 'text',
-        content: '输入文本',
+        content: '',
         color: '#000000',
         left,
         top,
@@ -933,7 +946,7 @@ const onCanvasClick = (event: MouseEvent) => {
     case 'text':
       addCanvasElement({
         type: 'text',
-        content: '输入文本',
+        content: '',
         color: '#000000',
         left,
         top,
@@ -969,6 +982,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
     top: element.top || 0,
     width: element.width || 100,
     height: element.height || 100,
+    content: element.content || '',
     ...element,
   }
   canvasElements.value.push(newElement)
@@ -1054,9 +1068,31 @@ const getElementStyle = (element: CanvasElement) => {
 
 // 更新文本内容
 const updateTextContent = (event: Event, id: string) => {
+  // 中文输入过程中不更新内容
+  if (isComposing.value) return
+
   const element = canvasElements.value.find((el) => el.id === id)
   if (element && element.type === 'text') {
-    element.content = (event.target as HTMLElement).innerText
+    // 获取元素的实际文本内容
+    const target = event.target as HTMLElement
+    element.content = target.textContent || ''
+  }
+}
+
+// 中文输入开始
+const onCompositionStart = () => {
+  isComposing.value = true
+}
+
+// 中文输入结束
+const onCompositionEnd = (event: CompositionEvent, id: string) => {
+  isComposing.value = false
+
+  const element = canvasElements.value.find((el) => el.id === id)
+  if (element && element.type === 'text') {
+    // 使用compositionend事件中的数据更新内容
+    const target = event.target as HTMLElement
+    element.content = target.textContent || ''
   }
 }
 
