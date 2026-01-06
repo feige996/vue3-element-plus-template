@@ -30,7 +30,7 @@
           draggable="true"
           @dragstart="onDragStart($event, asset as any)"
         >
-          <div class="h-32 flex items-center justify-center p-2 bg-gray-50">
+          <div class="h-[128px] flex items-center justify-center p-2 bg-gray-50">
             <img
               :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
               :alt="asset.name"
@@ -1061,8 +1061,8 @@ const onDrop = (event: DragEvent) => {
       const img = new Image()
       img.onload = () => {
         const aspectRatio = img.width / img.height
-        const initialWidth = 200
-        const initialHeight = initialWidth / aspectRatio
+        const initialHeight = 128 // 固定高度，跟左侧的图片资产高度一致
+        const initialWidth = initialHeight * aspectRatio // 宽度根据宽高比计算
 
         // 计算缩放比例
         const scaleX = initialWidth / dragData.thumbnailWidth
