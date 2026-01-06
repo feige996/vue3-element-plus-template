@@ -11,7 +11,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
 const BACKEND_API_URL = 'http://10.200.16.127:8056'
-const AIGC_API_URL = 'http://10.200.16.74:9890'
+const AIGC_API_URL = 'http://10.200.16.74:9990'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
