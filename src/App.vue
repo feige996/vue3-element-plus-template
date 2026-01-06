@@ -316,14 +316,24 @@
         <div class="h-80 bg-white border-t border-gray-200 p-4 overflow-y-auto">
           <!-- 提示语输入框 -->
           <div class="mb-4">
-            <span>提示词：</span>
+            <span class="block text-xs font-medium text-gray-700 mb-1">提示词：</span>
             <el-input
               v-model="userPrompt"
               type="textarea"
               placeholder="请输入提示语"
               :rows="4"
-              class="text-xs"
+              class="w-full text-xs"
             ></el-input>
+          </div>
+
+          <!-- 图片大小选择 -->
+          <div class="mb-4">
+            <span class="block text-xs font-medium text-gray-700 mb-1">图片大小：</span>
+            <el-select v-model="imageSize" class="w-32 text-xs">
+              <el-option label="1K" value="1K"></el-option>
+              <el-option label="2K" value="2K"></el-option>
+              <el-option label="4K" value="4K"></el-option>
+            </el-select>
           </div>
 
           <!-- AI生成按钮 -->
@@ -810,6 +820,9 @@ const userPrompt = ref('根据参考图片生成高质量图像')
 
 // 生成结果列表
 const generationResults = ref<string[]>([])
+
+// 图片大小选择
+const imageSize = ref('2K') // 默认值为2K
 
 // 画布引用
 const canvasRef = ref<HTMLElement | null>(null)
@@ -1698,7 +1711,7 @@ const generateAIGCImage = async () => {
       nano_pro: {
         imgUrls: resultList.value.slice(0, 6), // 不超过6张
         aspectRatio, // 支持"1:1"、"3:4"、"4:3"、"9:16" 和 "16:9"。默认值"1:1"。
-        imageSize: '2K', // 支持"1K"、"2K"、"4K", 注意K要大写，否则算法那边报错
+        imageSize: imageSize.value, // 支持"1K"、"2K"、"4K", 注意K要大写，否则算法那边报错
       },
       cosPath: `/aigc/text2imgv2/${currentDate}/${uuid}.png`,
       exifContent: [{ label: 1 }],
