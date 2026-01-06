@@ -104,10 +104,10 @@
       <!-- 画布和结果列表区域 -->
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- 画布区域 -->
-        <div class="flex-1 bg-gray-200 p-4 overflow-hidden">
+        <div class="flex-1 bg-gray-200 p-4 overflow-auto">
           <div
             ref="canvasRef"
-            class="w-full h-full bg-white border border-gray-300 relative"
+            class="w-full min-h-[800px] bg-white border border-gray-300 relative"
             @dragover.prevent
             @drop="onDrop"
             @click="onCanvasClick"
