@@ -291,14 +291,23 @@
             <div
               v-for="(result, index) in resultList"
               :key="index"
-              class="flex flex-col items-center"
+              class="flex flex-col items-center relative"
             >
-              <el-image
-                :src="result"
-                :preview-src-list="[result]"
-                class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
-                fit="contain"
-              ></el-image>
+              <div class="relative">
+                <el-image
+                  :src="result"
+                  :preview-src-list="[result]"
+                  class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
+                  fit="contain"
+                ></el-image>
+                <button
+                  class="absolute top-0 right-0 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full -mt-2 -mr-2 hover:bg-red-600 transition-colors z-10"
+                  @click.stop="deleteResult(index)"
+                  title="删除"
+                >
+                  ×
+                </button>
+              </div>
               <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
             </div>
           </div>
@@ -768,6 +777,11 @@ const generateScreenshot = () => {
   if (dashedElement) {
     captureAndSendScreenshot(dashedElement)
   }
+}
+
+// 删除结果列表中的图片
+const deleteResult = (index: number) => {
+  resultList.value.splice(index, 1)
 }
 
 // 拖拽状态管理
