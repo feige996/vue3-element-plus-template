@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-screen bg-gray-100">
-    <!-- 左侧资产列表 -->
+  <div class="flex flex-col bg-gray-100">
+    <!-- 上部：资产列表 -->
     <AssetList
       :image-assets="imageAssets"
       :pose-assets="poseAssets"
@@ -8,8 +8,8 @@
       @tab-change="(tab) => (currentAssetTab = tab)"
     />
 
-    <!-- 中间画布区域 -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- 中部：工具栏 + 画布 + 属性面板 -->
+    <div class="flex flex-col" style="height: 800px">
       <!-- 工具栏 -->
       <Toolbar
         ref="toolbarRef"
@@ -23,26 +23,41 @@
         @clear-canvas="clearCanvas"
       />
 
-      <!-- 画布 -->
-      <Canvas
-        ref="canvasRef"
-        :canvas-elements="canvasElements"
-        :selected-element-id="selectedElementId"
-        :active-tool="activeTool"
-        :edit-mode="editMode"
-        :current-number="currentNumber"
-        :color-list="colorList"
-        :current-color-index="currentColorIndex"
-        @element-add="(element) => addCanvasElement(element)"
-        @element-update="(element) => updateElement(element)"
-        @element-delete="deleteElement"
-        @element-select="selectElement"
-        @text-input="updateTextContent"
-        @composition-start="onCompositionStart"
-        @composition-end="onCompositionEnd"
-        @number-update="(number) => (currentNumber = number)"
-      />
+      <!-- 画布和属性面板 -->
+      <div class="flex flex-1 overflow-hidden">
+        <!-- 画布 -->
+        <Canvas
+          ref="canvasRef"
+          :canvas-elements="canvasElements"
+          :selected-element-id="selectedElementId"
+          :active-tool="activeTool"
+          :edit-mode="editMode"
+          :current-number="currentNumber"
+          :color-list="colorList"
+          :current-color-index="currentColorIndex"
+          @element-add="(element) => addCanvasElement(element)"
+          @element-update="(element) => updateElement(element)"
+          @element-delete="deleteElement"
+          @element-select="selectElement"
+          @text-input="updateTextContent"
+          @composition-start="onCompositionStart"
+          @composition-end="onCompositionEnd"
+          @number-update="(number) => (currentNumber = number)"
+        />
 
+        <!-- 右侧属性面板 -->
+        <PropertyPanel
+          :selected-element="selectedElement"
+          :color-list="colorList"
+          @delete-element="deleteElement"
+          @update-dashed-height="updateDashedHeight"
+          @update-element="(element) => updateElement(element)"
+        />
+      </div>
+    </div>
+
+    <!-- 下部：结果列表 + AI生成区域 -->
+    <div class="flex flex-1 overflow-hidden">
       <!-- 结果列表 -->
       <ResultList
         :result-list="resultList"
@@ -61,15 +76,6 @@
         @delete-generation-result="deleteGenerationResult"
       />
     </div>
-
-    <!-- 右侧属性面板 -->
-    <PropertyPanel
-      :selected-element="selectedElement"
-      :color-list="colorList"
-      @delete-element="deleteElement"
-      @update-dashed-height="updateDashedHeight"
-      @update-element="(element) => updateElement(element)"
-    />
   </div>
 </template>
 

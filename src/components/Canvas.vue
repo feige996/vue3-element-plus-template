@@ -1,8 +1,8 @@
 <template>
-  <div class="flex-1 bg-gray-200 p-4 overflow-auto">
+  <div class="flex-1 bg-gray-200 p-4 overflow-auto h-full box-border">
     <div
       ref="canvasRef"
-      class="w-full min-h-[800px] bg-white border border-gray-300 relative"
+      class="w-full h-full bg-white border border-gray-300 relative"
       @dragover.prevent
       @drop="onDrop"
       @click="onCanvasClick"

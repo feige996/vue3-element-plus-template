@@ -1,45 +1,45 @@
 <template>
-  <div class="w-64 bg-white border-r border-gray-200 overflow-hidden">
-    <h2 class="p-4 text-lg font-semibold bg-gray-50 border-b border-gray-200">资产列表</h2>
+  <div class="bg-white border-b border-gray-200 overflow-hidden">
+    <div class="flex items-center px-4 py-2 bg-gray-50 border-b border-gray-200">
+      <h2 class="text-lg font-semibold">资产列表</h2>
 
-    <!-- 资产类型标签页 -->
-    <div class="border-b border-gray-200 flex">
-      <button
-        v-for="tab in assetTabs"
-        :key="tab.value"
-        :class="[
-          'flex-1 py-2 px-4 text-sm font-medium transition-colors',
-          currentTab === tab.value
-            ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
-            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
-        ]"
-        @click="handleTabChange(tab.value)"
-      >
-        {{ tab.label }}
-      </button>
+      <!-- 资产类型标签页 -->
+      <div class="ml-8 flex">
+        <button
+          v-for="tab in assetTabs"
+          :key="tab.value"
+          :class="[
+            'px-4 py-1 text-sm font-medium transition-colors',
+            currentTab === tab.value
+              ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
+          ]"
+          @click="handleTabChange(tab.value)"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
     </div>
 
     <!-- 资产列表 -->
-    <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-104px)]">
+    <div class="flex p-4 gap-4 overflow-x-auto h-[200px]">
       <div
         v-for="(asset, index) in filteredAssets"
         :key="index"
-        class="cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow mb-2"
+        class="flex-shrink-0 cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow"
         draggable="true"
         @dragstart="onDragStart($event, asset as any)"
       >
-        <div class="h-[128px] flex items-center justify-center p-2 bg-gray-50">
+        <div class="h-[120px] w-[120px] flex items-center justify-center p-2 bg-gray-50">
           <img
             :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
             :alt="asset.name"
             :class="
-              asset.type === 'image'
-                ? 'h-full w-auto object-contain'
-                : 'w-full h-full object-cover'
+              asset.type === 'image' ? 'h-full w-auto object-contain' : 'w-full h-full object-cover'
             "
           />
         </div>
-        <div class="p-2 text-sm text-center">
+        <div class="p-2 text-sm text-center truncate w-[120px]">
           {{ asset.name }}
         </div>
         <div class="text-xs text-gray-500 pb-2 text-center">
