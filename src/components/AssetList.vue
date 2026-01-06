@@ -32,13 +32,31 @@
 
     <!-- 资产列表 -->
     <div v-show="isExpanded" class="flex gap-4 overflow-x-auto">
+      <!-- 上传控件 -->
+      <ImageUpload
+        width="w-[100px]"
+        height="h-[100px]"
+        :upload-text="currentTab === 'images' ? '+上传图片' : '+上传姿势'"
+        @upload="handleUpload"
+      />
+
+      <!-- 资产列表项 -->
       <div
         v-for="(asset, index) in filteredAssets"
         :key="index"
-        class="flex-shrink-0 cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow"
+        class="flex-shrink-0 cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow relative"
         draggable="true"
         @dragstart="onDragStart($event, asset as any)"
       >
+        <!-- 删除按钮 -->
+        <el-button
+          type="danger"
+          :icon="Close"
+          circle
+          size="small"
+          class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10"
+          @click.stop="handleDeleteAsset(index)"
+        />
         <div class="h-[100px] w-[100px] flex items-center justify-center p-2 bg-gray-50">
           <img
             :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
@@ -58,7 +76,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import { ArrowUp, ArrowDown, Close } from '@element-plus/icons-vue'
+import ImageUpload from './ImageUpload.vue'
+import type { UploadFile } from 'element-plus'
 
 // 展开收起状态
 const isExpanded = ref(true)
@@ -98,6 +118,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'tab-change': [tab: 'images' | 'poses']
   'drag-start': [event: DragEvent, asset: CombinedAsset]
+  upload: [file: UploadFile]
+  'delete-asset': [index: number]
 }>()
 
 // 资产库标签页配置
@@ -144,5 +166,15 @@ const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
     event.dataTransfer.setData('asset', JSON.stringify(dragData))
     emit('drag-start', event, asset)
   }
+}
+
+// 处理上传
+const handleUpload = (file: UploadFile) => {
+  emit('upload', file)
+}
+
+// 处理删除资产
+const handleDeleteAsset = (index: number) => {
+  emit('delete-asset', index)
 }
 </script>

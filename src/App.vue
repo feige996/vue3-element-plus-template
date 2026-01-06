@@ -6,6 +6,8 @@
       :pose-assets="poseAssets"
       :current-tab="currentAssetTab"
       @tab-change="(tab) => (currentAssetTab = tab)"
+      @upload="handleAssetUpload"
+      @delete-asset="handleDeleteAsset"
     />
 
     <!-- 中部：工具栏 + 画布 + 属性面板 -->
@@ -502,6 +504,48 @@ const handleUpload = async (file: UploadFile) => {
     } catch (error) {
       console.error('上传失败:', error)
     }
+  }
+}
+
+// 资产上传处理
+const handleAssetUpload = async (file: UploadFile) => {
+  if (file?.raw && file.raw instanceof File) {
+    try {
+      const uploadInfo = await uploadFile({
+        filename: file.raw.name,
+        file: file.raw,
+      })
+
+      if (currentAssetTab.value === 'images') {
+        const newAsset: Asset = {
+          id: Date.now(),
+          name: file.raw.name,
+          type: 'image',
+          url: uploadInfo.previewUrl,
+        }
+        imageAssets.value.push(newAsset)
+      } else {
+        const newPose: Pose = {
+          id: Date.now(),
+          name: file.raw.name,
+          type: 'pose',
+          poseId: `custom-${Date.now()}`,
+          thumbnail: uploadInfo.previewUrl,
+        }
+        poseAssets.value.push(newPose)
+      }
+    } catch (error) {
+      console.error('资产上传失败:', error)
+    }
+  }
+}
+
+// 删除资产处理
+const handleDeleteAsset = (index: number) => {
+  if (currentAssetTab.value === 'images') {
+    imageAssets.value.splice(index, 1)
+  } else {
+    poseAssets.value.splice(index, 1)
   }
 }
 
