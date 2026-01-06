@@ -272,8 +272,7 @@
               :show-file-list="false"
               accept="image/*"
             >
-              <el-icon class="text-gray-400"><Plus /></el-icon>
-              <span class="text-xs text-gray-400 mt-1">上传图片</span>
+              <span class="text-xs text-gray-400">+上传图片</span>
             </el-upload>
 
             <!-- 结果列表项 -->
@@ -288,9 +287,6 @@
                 class="w-24 h-24 object-cover border border-gray-200 rounded"
               ></el-image>
               <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
-            </div>
-            <div v-if="resultList.length === 0" class="text-center text-gray-500 w-full py-8">
-              暂无结果，点击截图按钮生成或上传图片
             </div>
           </div>
         </div>
@@ -618,7 +614,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import HumanFigure from './components/HumanFigure.vue'
-import { Plus } from '@element-plus/icons-vue'
+import type { UploadFile } from 'element-plus'
 
 // 资产数据类型定义
 interface Asset {
@@ -781,13 +777,15 @@ const currentNumber = ref(1)
 const resultList = ref<string[]>([])
 
 // 文件上传处理
-const handleUpload = (file: any) => {
+const handleUpload = (file: UploadFile) => {
   const reader = new FileReader()
   reader.onload = (e) => {
     const imageData = e.target?.result as string
     resultList.value.push(imageData)
   }
-  reader.readAsDataURL(file.raw)
+  if (file?.raw) {
+    reader.readAsDataURL(file?.raw)
+  }
 }
 
 // 拖拽状态管理
