@@ -1653,7 +1653,7 @@ const generateAIGCImage = async () => {
         aspectRatio, // 支持"1:1"、"3:4"、"4:3"、"9:16" 和 "16:9"。默认值"1:1"。
         imageSize: '2K', // 支持"1K"、"2K"、"4K", 注意K要大写，否则算法那边报错
       },
-      cosPath: `/aigc/${currentDate}/${uuid}.png`,
+      cosPath: `/aigc/text2imgv2/${currentDate}/${uuid}.png`,
       exifContent: [{ label: 1 }],
     }
 
