@@ -185,6 +185,8 @@
             />
 
             <!-- 缩放控制点 -->
+            <!-- 精简控制点，只保留右下侧se时的控制点 -->
+            <!--
             <div
               v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
               class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
@@ -206,24 +208,6 @@
             <div
               v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
               class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ right: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'e')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ right: '-6px', bottom: '-6px', cursor: 'nwse-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'se')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ left: 'calc(50% - 6px)', bottom: '-6px', cursor: 'ns-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 's')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
               :style="{ left: '-6px', bottom: '-6px', cursor: 'nesw-resize' }"
               @mousedown.stop="onResizeStart($event, element, 'sw')"
             ></div>
@@ -232,6 +216,26 @@
               class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
               :style="{ left: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
               @mousedown.stop="onResizeStart($event, element, 'w')"
+            ></div>
+
+            <div
+              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+              :style="{ right: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
+              @mousedown.stop="onResizeStart($event, element, 'e')"
+            ></div>
+             <div
+              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+              :style="{ left: 'calc(50% - 6px)', bottom: '-6px', cursor: 'ns-resize' }"
+              @mousedown.stop="onResizeStart($event, element, 's')"
+            ></div>
+            -->
+            <div
+              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+              :style="{ right: '-6px', bottom: '-6px', cursor: 'nwse-resize' }"
+              @mousedown.stop="onResizeStart($event, element, 'se')"
             ></div>
           </div>
 
