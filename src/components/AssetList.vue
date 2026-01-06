@@ -1,28 +1,41 @@
 <template>
   <div class="bg-white border-b border-gray-200 overflow-hidden">
-    <div class="flex items-center px-4 py-2 bg-gray-50 border-b border-gray-200">
-      <h2 class="text-lg font-semibold">资产列表</h2>
+    <div class="flex items-center gap-4 px-2 bg-gray-50 border-b border-gray-200">
+      <div class="flex items-center">
+        <h2 class="text-lg font-semibold">资产列表</h2>
 
-      <!-- 资产类型标签页 -->
-      <div class="ml-8 flex">
-        <button
-          v-for="tab in assetTabs"
-          :key="tab.value"
-          :class="[
-            'px-4 py-1 text-sm font-medium transition-colors',
-            currentTab === tab.value
-              ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
-              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
-          ]"
-          @click="handleTabChange(tab.value)"
-        >
-          {{ tab.label }}
-        </button>
+        <!-- 资产类型标签页 -->
+        <div class="ml-8 flex">
+          <button
+            v-for="tab in assetTabs"
+            :key="tab.value"
+            :class="[
+              'px-4 py-1 text-sm font-medium transition-colors',
+              currentTab === tab.value
+                ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
+            ]"
+            @click="handleTabChange(tab.value)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
       </div>
+
+      <!-- 展开收起按钮 -->
+      <button
+        class="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+        @click="isExpanded = !isExpanded"
+      >
+        {{ isExpanded ? '收起' : '展开' }}
+        <span class="ml-1">
+          {{ isExpanded ? '▲' : '▼' }}
+        </span>
+      </button>
     </div>
 
     <!-- 资产列表 -->
-    <div class="flex p-4 gap-4 overflow-x-auto h-[200px]">
+    <div v-show="isExpanded" class="flex gap-4 overflow-x-auto">
       <div
         v-for="(asset, index) in filteredAssets"
         :key="index"
@@ -30,7 +43,7 @@
         draggable="true"
         @dragstart="onDragStart($event, asset as any)"
       >
-        <div class="h-[120px] w-[120px] flex items-center justify-center p-2 bg-gray-50">
+        <div class="h-[100px] w-[100px] flex items-center justify-center p-2 bg-gray-50">
           <img
             :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
             :alt="asset.name"
@@ -39,11 +52,8 @@
             "
           />
         </div>
-        <div class="p-2 text-sm text-center truncate w-[120px]">
+        <div class="p-2 text-sm text-center truncate w-[100px]">
           {{ asset.name }}
-        </div>
-        <div class="text-xs text-gray-500 pb-2 text-center">
-          {{ asset.type === 'pose' ? '预设姿势' : '图片' }}
         </div>
       </div>
     </div>
@@ -52,6 +62,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+
+// 展开收起状态
+const isExpanded = ref(true)
 
 // 资产数据类型定义
 interface Asset {

@@ -9,7 +9,7 @@
     />
 
     <!-- 中部：工具栏 + 画布 + 属性面板 -->
-    <div class="flex flex-col" style="height: 800px">
+    <div class="flex flex-col border-b border-gray-300" style="height: 600px">
       <!-- 工具栏 -->
       <Toolbar
         ref="toolbarRef"
@@ -24,35 +24,39 @@
       />
 
       <!-- 画布和属性面板 -->
-      <div class="flex flex-1 overflow-hidden">
+      <div class="flex flex-1 overflow-hidden bg-gray-50">
         <!-- 画布 -->
-        <Canvas
-          ref="canvasRef"
-          :canvas-elements="canvasElements"
-          :selected-element-id="selectedElementId"
-          :active-tool="activeTool"
-          :edit-mode="editMode"
-          :current-number="currentNumber"
-          :color-list="colorList"
-          :current-color-index="currentColorIndex"
-          @element-add="(element) => addCanvasElement(element)"
-          @element-update="(element) => updateElement(element)"
-          @element-delete="deleteElement"
-          @element-select="selectElement"
-          @text-input="updateTextContent"
-          @composition-start="onCompositionStart"
-          @composition-end="onCompositionEnd"
-          @number-update="(number) => (currentNumber = number)"
-        />
+        <div class="flex-1 border-r border-gray-300 bg-white">
+          <Canvas
+            ref="canvasRef"
+            :canvas-elements="canvasElements"
+            :selected-element-id="selectedElementId"
+            :active-tool="activeTool"
+            :edit-mode="editMode"
+            :current-number="currentNumber"
+            :color-list="colorList"
+            :current-color-index="currentColorIndex"
+            @element-add="(element) => addCanvasElement(element)"
+            @element-update="(element) => updateElement(element)"
+            @element-delete="deleteElement"
+            @element-select="selectElement"
+            @text-input="updateTextContent"
+            @composition-start="onCompositionStart"
+            @composition-end="onCompositionEnd"
+            @number-update="(number) => (currentNumber = number)"
+          />
+        </div>
 
         <!-- 右侧属性面板 -->
-        <PropertyPanel
-          :selected-element="selectedElement"
-          :color-list="colorList"
-          @delete-element="deleteElement"
-          @update-dashed-height="updateDashedHeight"
-          @update-element="(element) => updateElement(element)"
-        />
+        <div class="w-72 border-l border-gray-300 bg-white">
+          <PropertyPanel
+            :selected-element="selectedElement"
+            :color-list="colorList"
+            @delete-element="deleteElement"
+            @update-dashed-height="updateDashedHeight"
+            @update-element="(element) => updateElement(element)"
+          />
+        </div>
       </div>
     </div>
 
@@ -327,7 +331,7 @@ const initializeDashedElement = () => {
   const rect = canvasRef.value.canvasRef.getBoundingClientRect()
   const centerX = rect.width / 2
   const centerY = rect.height / 2
-  const size = 600
+  const size = 500
 
   const dashedElement: CanvasElement = {
     id: 'main-dashed-element',
