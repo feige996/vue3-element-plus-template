@@ -51,7 +51,9 @@
       <div
         v-for="(asset, index) in filteredAssets"
         :key="index"
-        class="flex flex-col items-center relative"
+        class="flex flex-col items-center relative cursor-move"
+        draggable="true"
+        @dragstart="onDragStart($event, asset as any)"
       >
         <div class="relative">
           <el-image
@@ -119,6 +121,7 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits 定义
 const emit = defineEmits<{
   'tab-change': [tab: 'images' | 'poses']
+  'drag-start': [event: DragEvent, asset: CombinedAsset]
   upload: [file: UploadFile]
   'delete-asset': [index: number]
 }>()
@@ -145,6 +148,28 @@ const filteredAssets = computed(() => {
 const handleTabChange = (tab: 'images' | 'poses') => {
   currentTab.value = tab
   emit('tab-change', tab)
+}
+
+// 拖拽开始处理
+const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
+  if (event.dataTransfer) {
+    // 获取鼠标在缩略图上的相对位置
+    const target = event.target as HTMLElement
+    const rect = target.getBoundingClientRect()
+    const relativeX = event.clientX - rect.left
+    const relativeY = event.clientY - rect.top
+
+    // 将资产信息和相对位置一起存储
+    const dragData = {
+      asset,
+      relativeX,
+      relativeY,
+      thumbnailWidth: rect.width,
+      thumbnailHeight: rect.height,
+    }
+    event.dataTransfer.setData('asset', JSON.stringify(dragData))
+    emit('drag-start', event, asset)
+  }
 }
 
 // 处理上传
