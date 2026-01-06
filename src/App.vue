@@ -596,6 +596,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import HumanFigure from './components/HumanFigure.vue'
 import type { UploadFile } from 'element-plus'
+import { uploadFile } from './utils/upload'
 
 // 资产数据类型定义
 interface Asset {
@@ -758,15 +759,21 @@ const currentNumber = ref(1)
 const resultList = ref<string[]>([])
 
 // 文件上传处理
-const handleUpload = (file: UploadFile) => {
+const handleUpload = async (file: UploadFile) => {
   // 确保file.raw存在且是File类型
   if (file?.raw && file.raw instanceof File) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const imageData = e.target?.result as string
-      resultList.value.push(imageData)
+    try {
+      // 使用uploadFile函数上传文件
+      const uploadInfo = await uploadFile({
+        filename: file.raw.name,
+        file: file.raw,
+      })
+
+      // 将线上地址添加到结果列表
+      resultList.value.push(uploadInfo.previewUrl)
+    } catch (error) {
+      console.error('上传失败:', error)
     }
-    reader.readAsDataURL(file.raw)
   }
 }
 
@@ -1555,12 +1562,34 @@ const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
     // 更新虚线框元素的截图数据
     dashedElement.screenshot = imageData
 
-    // 将截图添加到结果列表
-    resultList.value.push(imageData)
+    // 将 base64 转换为 File 对象
+    const base64ToFile = (dataUrl: string, filename: string) => {
+      const arr = dataUrl.split(',')
+      const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
+      const bstr = atob(arr[1])
+      let n = bstr.length
+      const u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new File([u8arr], filename, { type: mime })
+    }
+
+    // 创建截图文件
+    const screenshotFile = base64ToFile(imageData, `screenshot-${Date.now()}.png`)
+
+    // 上传截图
+    const uploadInfo = await uploadFile({
+      filename: screenshotFile.name,
+      file: screenshotFile,
+    })
+
+    // 将线上地址添加到结果列表
+    resultList.value.push(uploadInfo.previewUrl)
 
     // 发送给后端（这里是一个示例，您需要根据实际后端接口调整）
     console.log('截图数据:', {
-      image: imageData,
+      image: uploadInfo.previewUrl,
       rect: rect,
       aspectRatio: dashedElement.aspectRatio,
       timestamp: new Date().toISOString(),
@@ -1573,9 +1602,9 @@ const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
     //     'Content-Type': 'application/json'
     //   },
     //   body: JSON.stringify({
-    //     image: imageData,
+    //     image: uploadInfo.previewUrl,
     //     rect: rect,
-    //     aspectRatio: dashedAspectRatio.value
+    //     aspectRatio: dashedElement.aspectRatio
     //   })
     // })
     // const result = await response.json()
