@@ -262,6 +262,20 @@
         <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
           <h3 class="text-sm font-medium text-gray-700 mb-2">结果列表</h3>
           <div class="flex flex-wrap gap-4">
+            <!-- 上传控件 -->
+            <el-upload
+              class="w-24 h-24 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
+              action="#"
+              :auto-upload="false"
+              :on-change="handleUpload"
+              :draggable="true"
+              accept="image/*"
+            >
+              <el-icon class="text-gray-400"><Plus /></el-icon>
+              <span class="text-xs text-gray-400 mt-1">上传图片</span>
+            </el-upload>
+
+            <!-- 结果列表项 -->
             <div
               v-for="(result, index) in resultList"
               :key="index"
@@ -275,7 +289,7 @@
               <span class="text-xs text-gray-500 mt-1">{{ `结果 ${index + 1}` }}</span>
             </div>
             <div v-if="resultList.length === 0" class="text-center text-gray-500 w-full py-8">
-              暂无结果，点击截图按钮生成
+              暂无结果，点击截图按钮生成或上传图片
             </div>
           </div>
         </div>
@@ -603,6 +617,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import HumanFigure from './components/HumanFigure.vue'
+import { Plus } from '@element-plus/icons-vue'
 
 // 资产数据类型定义
 interface Asset {
@@ -763,6 +778,16 @@ const currentNumber = ref(1)
 
 // 结果列表
 const resultList = ref<string[]>([])
+
+// 文件上传处理
+const handleUpload = (file: any) => {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const imageData = e.target?.result as string
+    resultList.value.push(imageData)
+  }
+  reader.readAsDataURL(file.raw)
+}
 
 // 拖拽状态管理
 const isDragging = ref(false)
