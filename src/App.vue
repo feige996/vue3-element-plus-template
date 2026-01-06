@@ -162,8 +162,8 @@
               v-else-if="element.type === 'number'"
               class="flex items-center justify-center text-white rounded-full font-bold"
               :style="{
-                width: `${element.width || 32}px`,
-                height: `${element.height || 32}px`,
+                width: `${element.size || 32}px`,
+                height: `${element.size || 32}px`,
                 backgroundColor: element.backgroundColor || '#ef4444',
               }"
             >
@@ -352,22 +352,25 @@
                 class="w-full h-8 border border-gray-300 rounded"
               />
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">宽度</label>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">大小</label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="range"
+                  v-model.number="selectedElement.size"
+                  min="16"
+                  max="100"
+                  step="1"
+                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
                 <input
                   type="number"
-                  v-model.number="selectedElement.width"
-                  class="w-full p-1 border border-gray-300 rounded"
+                  v-model.number="selectedElement.size"
+                  min="16"
+                  max="100"
+                  class="w-16 p-1 border border-gray-300 rounded"
                 />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">高度</label>
-                <input
-                  type="number"
-                  v-model.number="selectedElement.height"
-                  class="w-full p-1 border border-gray-300 rounded"
-                />
+                <span class="text-sm text-gray-500">px</span>
               </div>
             </div>
           </div>
@@ -587,6 +590,7 @@ interface CanvasElement {
   top: number
   width?: number
   height?: number
+  size?: number // 大小，用于数字标
   url?: string
   name?: string
   content?: string
@@ -1321,6 +1325,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
     top: element.top || 0,
     width: element.width || 100,
     height: element.height || 100,
+    size: element.size || (element.type === 'number' ? 32 : undefined), // 数字标默认大小
     content: element.content || '',
     rotation: element.rotation || 0,
     fontSize: element.fontSize || 16, // 默认字体大小
@@ -1404,11 +1409,15 @@ const clearCanvas = () => {
 
 // 获取元素样式
 const getElementStyle = (element: CanvasElement) => {
+  // 数字标使用size属性
+  const elementWidth = element.type === 'number' ? element.size || 32 : element.width
+  const elementHeight = element.type === 'number' ? element.size || 32 : element.height
+
   const baseStyle = {
     left: `${element.left}px`,
     top: `${element.top}px`,
-    width: `${element.width}px`,
-    height: `${element.height}px`,
+    width: `${elementWidth}px`,
+    height: `${elementHeight}px`,
     color: element.color,
     position: 'absolute' as const,
     transform: `rotate(${element.rotation || 0}deg)`,
