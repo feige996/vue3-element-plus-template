@@ -1706,11 +1706,12 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
           )
 
           if (progressItemIndex !== -1) {
-            // 更新进度
-            generationResults.value[progressItemIndex].progress = statusResponse.progress
-            // 更新状态
-            generationResults.value[progressItemIndex].status = statusResponse.status
-
+            if (generationResults.value?.[progressItemIndex]) {
+              // 更新进度
+              generationResults.value[progressItemIndex].progress = statusResponse.progress
+              // 更新状态
+              generationResults.value[progressItemIndex].status = statusResponse.status
+            }
             // 检查任务状态
             if (statusResponse.status === TaskStatusE.COMPLETED) {
               // 任务已完成
@@ -1743,7 +1744,9 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
                 }
               } else {
                 // 如果没有图片，标记为失败
-                generationResults.value[progressItemIndex].status = TaskStatusE.FAILED
+                if (generationResults.value?.[progressItemIndex]) {
+                  generationResults.value[progressItemIndex].status = TaskStatusE.FAILED
+                }
               }
 
               resolve()
@@ -1751,7 +1754,9 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
               // 任务失败
               clearInterval(statusCheckInterval!)
               // 更新进度项为失败状态
-              generationResults.value[progressItemIndex].status = TaskStatusE.FAILED
+              if (generationResults.value?.[progressItemIndex]) {
+                generationResults.value[progressItemIndex].status = TaskStatusE.FAILED
+              }
               console.error(`AI 图片生成失败: ${statusResponse.failedReason}`)
               reject(new Error(statusResponse.failedReason))
             } else if (
