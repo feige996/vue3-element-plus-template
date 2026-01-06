@@ -7,7 +7,7 @@
         v-model="userPrompt"
         type="textarea"
         placeholder="请输入提示语"
-        :rows="4"
+        :rows="1"
         class="w-full text-xs"
       ></el-input>
     </div>
