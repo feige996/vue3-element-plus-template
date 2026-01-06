@@ -446,6 +446,14 @@
 
           <!-- 通用属性 -->
           <div v-if="selectedElement.type !== 'dashed'" class="mt-4">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">层级 (z-index)</label>
+              <input
+                type="number"
+                v-model.number="selectedElement.zIndex"
+                class="w-full p-1 border border-gray-300 rounded"
+              />
+            </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">左偏移</label>
@@ -537,6 +545,7 @@ interface CanvasElement {
   rotation?: number // 旋转角度，单位：度
   figureType?: string // 人物类型
   pose?: string // 人物姿势
+  zIndex?: number // 层级
 }
 
 // 预设姿势类型定义
@@ -746,6 +755,7 @@ const initializeDashedElement = () => {
     height: size,
     aspectRatio: 1,
     screenshot: undefined,
+    zIndex: 1, // 虚线框固定在最底层
   }
 
   canvasElements.value.push(dashedElement)
@@ -1238,8 +1248,18 @@ const onCanvasClick = (event: MouseEvent) => {
   }
 }
 
+// 当前最大zIndex值
+const currentMaxZIndex = ref(100)
+
 // 添加画布元素
 const addCanvasElement = (element: Partial<CanvasElement>) => {
+  // 为新元素分配zIndex
+  const elementZIndex = element.zIndex || currentMaxZIndex.value
+  // 更新最大zIndex值
+  if (elementZIndex >= currentMaxZIndex.value) {
+    currentMaxZIndex.value = elementZIndex + 1
+  }
+
   const newElement: CanvasElement = {
     id: `element-${Date.now()}`,
     type: element.type || 'text',
@@ -1249,6 +1269,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
     height: element.height || 100,
     content: element.content || '',
     rotation: element.rotation || 0,
+    zIndex: elementZIndex,
     ...element,
   }
   canvasElements.value.push(newElement)
@@ -1336,6 +1357,7 @@ const getElementStyle = (element: CanvasElement) => {
     position: 'absolute' as const,
     transform: `rotate(${element.rotation || 0}deg)`,
     transformOrigin: 'center',
+    zIndex: element.zIndex,
   }
 }
 
