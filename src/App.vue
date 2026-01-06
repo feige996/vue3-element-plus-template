@@ -272,6 +272,16 @@
               </span>
               <span v-else>生成截图</span>
             </button>
+            <button
+              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
+              @click="generateAIGCImage"
+              :disabled="isAIGCLoading || resultList.length === 0"
+            >
+              <span v-if="isAIGCLoading" class="flex items-center">
+                <span class="animate-spin mr-1">⏳</span> 生成中...
+              </span>
+              <span v-else>AI生成</span>
+            </button>
           </div>
           <div class="flex flex-wrap gap-4">
             <!-- 上传控件 -->
@@ -740,6 +750,9 @@ const mainDashedElement = ref<CanvasElement | null>(null)
 
 // 截图loading状态
 const isScreenshotLoading = ref(false)
+
+// AIGC 生成loading状态
+const isAIGCLoading = ref(false)
 
 // 中文输入状态
 const isComposing = ref(false)
@@ -1524,6 +1537,87 @@ const onCompositionEnd = (event: CompositionEvent, id: string) => {
     // 使用compositionend事件中的数据更新内容
     const target = event.target as HTMLElement
     element.content = target.textContent || ''
+  }
+}
+
+// 生成唯一ID
+const generateUUID = () => {
+  return crypto.randomUUID()
+}
+
+// 生成当前日期字符串 (YYYY-MM-DD)
+const getCurrentDate = () => {
+  return new Date().toISOString().split('T')[0]
+}
+
+// 调用 AIGC 接口生成图片
+const generateAIGCImage = async () => {
+  // 检查结果列表是否为空
+  if (resultList.value.length === 0) {
+    alert('请先上传或生成图片到结果列表')
+    return
+  }
+
+  try {
+    isAIGCLoading.value = true
+
+    // 生成唯一ID
+    const taskId = parseInt(generateUUID().replace(/-/g, '').substring(0, 10))
+    const uuid = generateUUID()
+    const currentDate = getCurrentDate()
+
+    // 找到虚线框元素
+    const dashedElement = canvasElements.value.find((el) => el.type === 'dashed')
+
+    // 获取虚线框的比例
+    let aspectRatio = '1:1'
+    if (dashedElement?.aspectRatio) {
+      const ratio = dashedElement.aspectRatio
+      if (ratio === 1) aspectRatio = '1:1'
+      else if (ratio === 3 / 4) aspectRatio = '3:4'
+      else if (ratio === 4 / 3) aspectRatio = '4:3'
+      else if (ratio === 9 / 16) aspectRatio = '9:16'
+      else if (ratio === 16 / 9) aspectRatio = '16:9'
+    }
+
+    // 构建请求参数
+    const request = {
+      taskId: Math.random() * 100000000000000000,
+      taskName: 'text2imgv2',
+      prompt: {
+        zh: '图2中人物在图1中',
+      },
+      lora: 'nano-pro',
+      trigger_prompt: {
+        zh: '去掉网格线',
+      },
+      nano_pro: {
+        imgUrls: resultList.value.slice(0, 6), // 不超过6张
+        aspectRatio, // 支持"1:1"、"3:4"、"4:3"、"9:16" 和 "16:9"。默认值"1:1"。
+        imageSize: '2k', // 支持"1K"、"2K"、"4K"
+      },
+      cosPath: `/aigc/${currentDate}/${uuid}.png`,
+      exifContent: [{ label: 1 }],
+    }
+
+    // 调用 AIGC 接口
+    const response = await generateImage(request)
+
+    // 处理响应
+    if (response.code === 0 && response.data?.imageUrl) {
+      // 将生成的图片添加到结果列表
+      resultList.value.push(response.data.imageUrl)
+      alert('AI 图片生成成功！')
+    } else {
+      alert(`AI 图片生成失败: ${response.message}`)
+    }
+
+    console.log('AIGC API Response:', response)
+  } catch (error) {
+    console.error('Error calling AIGC API:', error)
+    alert('AI 图片生成失败，请检查控制台日志')
+  } finally {
+    isAIGCLoading.value = false
   }
 }
 

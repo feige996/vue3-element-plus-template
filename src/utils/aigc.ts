@@ -1,7 +1,7 @@
 // 定义请求参数类型
 export interface AIGCPromptRequest {
   taskId: number // 工程侧任务id
-  taskName: 'text2imgv2'
+  taskName: string // 任务名称，固定为"text2imgv2"
   prompt: {
     zh: string // 中文提示词
   }
@@ -23,8 +23,13 @@ export interface AIGCPromptResponse {
   code: number
   message: string
   data?: {
-    imageUrl: string
-    taskId: number
+    pendingNumbers: number
+    predictProcessSec: number
+    progress: number
+    prompt_id: string
+    status: number
+    suggest_action: string
+    suggestion: string
   }
 }
 
