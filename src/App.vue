@@ -306,6 +306,27 @@
                 class="w-full h-8 border border-gray-300 rounded"
               />
             </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">字体大小</label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="range"
+                  v-model.number="selectedElement.fontSize"
+                  min="8"
+                  max="72"
+                  step="1"
+                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <input
+                  type="number"
+                  v-model.number="selectedElement.fontSize"
+                  min="8"
+                  max="72"
+                  class="w-16 p-1 border border-gray-300 rounded"
+                />
+                <span class="text-sm text-gray-500">px</span>
+              </div>
+            </div>
           </div>
 
           <!-- 数字标属性 -->
@@ -540,6 +561,7 @@ interface CanvasElement {
   content?: string
   color?: string
   number?: number
+  fontSize?: number // 字体大小
   aspectRatio?: number // 宽高比，仅用于图片和虚线框元素
   screenshot?: string // 截图数据，仅用于虚线框元素
   rotation?: number // 旋转角度，单位：度
@@ -1269,6 +1291,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
     height: element.height || 100,
     content: element.content || '',
     rotation: element.rotation || 0,
+    fontSize: element.fontSize || 16, // 默认字体大小
     zIndex: elementZIndex,
     ...element,
   }
@@ -1348,7 +1371,7 @@ const clearCanvas = () => {
 
 // 获取元素样式
 const getElementStyle = (element: CanvasElement) => {
-  return {
+  const baseStyle = {
     left: `${element.left}px`,
     top: `${element.top}px`,
     width: `${element.width}px`,
@@ -1359,6 +1382,16 @@ const getElementStyle = (element: CanvasElement) => {
     transformOrigin: 'center',
     zIndex: element.zIndex,
   }
+
+  // 为文本元素添加字体大小
+  if (element.type === 'text') {
+    return {
+      ...baseStyle,
+      fontSize: `${element.fontSize || 16}px`,
+    }
+  }
+
+  return baseStyle
 }
 
 // 更新文本内容
