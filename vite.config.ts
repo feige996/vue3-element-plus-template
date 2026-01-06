@@ -10,7 +10,7 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
-const VITE_PROXY_API_URL = 'http://10.200.16.100:8080'
+const VITE_PROXY_API_URL = 'http://10.200.16.127:8056'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -56,8 +56,7 @@ export default defineConfig({
       '/api': {
         target: VITE_PROXY_API_URL,
         changeOrigin: true,
-        // rewrite: path =>
-        //   path.replace(new RegExp(`^${env.VITE_PROXY_PREFIX}`), ''),
+        rewrite: (path) => path.replace(new RegExp(`/api`), ''),
         configure: (proxyServer) => {
           proxyServer.on('proxyReq', (proxyReq, req) => {
             const fullProxyPath = `${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`

@@ -24,7 +24,7 @@ export function getPresignedUrl(data: UploadCosReqI): Promise<ResDataI<UploadCos
   if (data.taskId) params.append('taskId', data.taskId)
 
   // 拼接到URL上
-  const url = `/api/v1/upload/cos/getPresignedUrl?${params.toString()}`
+  const url = `/api/aigc/common/cos/getPresignedUrl?${params.toString()}`
 
   return fetch(url, {
     method: 'GET',
@@ -40,7 +40,7 @@ export interface UploadOptionsI {
 }
 
 // 简单上传
-export async function uploadFile(options: UploadOptionsI): Promise<ResDataI<UploadCosResI>> {
+export async function uploadFile(options: UploadOptionsI): Promise<UploadCosResI> {
   // 获取上传地址和基本信息
   const uploadInfo = await getPresignedUrl({
     bizType: 'attachment',
@@ -60,10 +60,11 @@ export async function uploadFile(options: UploadOptionsI): Promise<ResDataI<Uplo
       'content-type': options.file.type,
     },
   })
+  console.log('response', response)
 
   if (!response.ok) {
     throw new Error(`Upload failed with status: ${response.status}`)
   }
 
-  return uploadInfo
+  return uploadInfo.data
 }
