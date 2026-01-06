@@ -1651,7 +1651,7 @@ const generateAIGCImage = async () => {
       nano_pro: {
         imgUrls: resultList.value.slice(0, 6), // 不超过6张
         aspectRatio, // 支持"1:1"、"3:4"、"4:3"、"9:16" 和 "16:9"。默认值"1:1"。
-        imageSize: '2k', // 支持"1K"、"2K"、"4K"
+        imageSize: '2K', // 支持"1K"、"2K"、"4K", 注意K要大写，否则算法那边报错
       },
       cosPath: `/aigc/${currentDate}/${uuid}.png`,
       exifContent: [{ label: 1 }],
