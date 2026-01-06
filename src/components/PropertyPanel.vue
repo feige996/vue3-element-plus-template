@@ -4,12 +4,9 @@
     <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-60px)]">
       <div v-if="localElement">
         <div class="mb-4">
-          <button
-            class="w-full px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-            @click="handleDeleteElement"
-          >
+          <el-button type="danger" class="w-full" @click="handleDeleteElement">
             删除元素
-          </button>
+          </el-button>
         </div>
 
         <div v-if="localElement.type === 'rect'">

@@ -2,16 +2,14 @@
   <div class="bg-white border-t border-gray-200 p-4 overflow-y-auto">
     <div class="flex gap-4 items-center mb-2">
       <h3 class="text-sm font-medium text-gray-700">传递给算法的图片列表</h3>
-      <button
-        class="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+      <el-button
+        type="success"
+        size="small"
         @click="handleGenerateScreenshot"
-        :disabled="isScreenshotLoading"
+        :loading="isScreenshotLoading"
       >
-        <span v-if="isScreenshotLoading" class="flex items-center">
-          <span class="animate-spin mr-1">⏳</span> 生成中...
-        </span>
-        <span v-else>生成截图</span>
-      </button>
+        生成截图
+      </el-button>
     </div>
     <div class="flex flex-wrap gap-4">
       <!-- 上传控件 -->
@@ -40,13 +38,14 @@
             class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
             fit="contain"
           ></el-image>
-          <button
-            class="absolute top-0 right-0 w-4 h-4 flex items-center justify-center bg-gray-400 text-white rounded-full outline-none border-none hover:bg-gray-500 transition-colors z-10 text-xs cursor-pointer"
+          <el-button
+            type="danger"
+            :icon="Close"
+            circle
+            size="small"
+            class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10"
             @click.stop="handleDeleteResult(index)"
-            title="删除"
-          >
-            ×
-          </button>
+          />
         </div>
         <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
       </div>
@@ -56,6 +55,7 @@
 
 <script setup lang="ts">
 // 组件名称：ResultListContainer（避免单词组件名警告）
+import { Close } from '@element-plus/icons-vue'
 import type { UploadFile } from 'element-plus'
 
 // Props 定义
@@ -64,7 +64,6 @@ interface Props {
   isScreenshotLoading?: boolean
 }
 
- 
 const props = withDefaults(defineProps<Props>(), {
   isScreenshotLoading: false,
 })

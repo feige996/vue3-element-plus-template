@@ -24,16 +24,15 @@
 
     <!-- AI生成按钮 -->
     <div class="mb-4">
-      <button
-        class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
+      <el-button
+        type="primary"
+        size="small"
         @click="handleGenerateAIGCImage"
-        :disabled="isAIGCLoading || resultList.length === 0"
+        :loading="isAIGCLoading"
+        :disabled="resultList.length === 0"
       >
-        <span v-if="isAIGCLoading" class="flex items-center">
-          <span class="animate-spin mr-1">⏳</span> 生成中...
-        </span>
-        <span v-else>AI生成</span>
-      </button>
+        AI生成
+      </el-button>
     </div>
     <h3 class="text-sm font-medium text-gray-700 mb-2">生成结果图片列表</h3>
 
@@ -107,13 +106,14 @@
           </div>
 
           <!-- 删除按钮 -->
-          <button
-            class="absolute top-0 right-0 w-5 h-5 flex items-center justify-center bg-gray-500 text-white rounded-full -mt-1.5 -mr-1.5 hover:bg-gray-600 transition-colors z-10 text-xs"
+          <el-button
+            type="danger"
+            :icon="Close"
+            circle
+            size="small"
+            class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10"
             @click.stop="handleDeleteGenerationResult(index)"
-            title="删除"
-          >
-            ×
-          </button>
+          />
         </div>
         <span class="text-xs text-gray-500 mt-1">{{ `生成结果 ${index + 1}` }}</span>
       </div>
@@ -126,6 +126,7 @@
 
 <script setup lang="ts">
 // 组件名称：GenerationResultContainer（避免单词组件名警告）
+import { Close } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { TaskStatusE } from '../utils/aigc'
 

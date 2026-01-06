@@ -3,47 +3,32 @@
     ref="toolbarRef"
     class="h-12 bg-white border-b border-gray-200 flex items-center px-2 space-x-2"
   >
-    <button
-      class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'text' }"
       @click="handleToolChange('text')"
-      :class="{
-        'bg-green-600 text-white ring-2 hover:bg-green-600': activeTool === 'text',
-      }"
     >
       文本框
-    </button>
-    <button
-      class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'rect' }"
       @click="handleToolChange('rect')"
-      :class="{
-        'bg-green-600 text-white ring-2 hover:bg-green-600': activeTool === 'rect',
-      }"
     >
       矩形框
-    </button>
-    <button
-      class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'number' }"
       @click="handleToolChange('number')"
-      :class="{
-        'bg-green-600 text-white ring-2 hover:bg-green-600': activeTool === 'number',
-      }"
     >
       数字标
-    </button>
+    </el-button>
     <div class="w-px h-6 bg-gray-300 mx-2"></div>
-    <button
-      class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-      @click="handleEditModeChange"
-      :class="{ 'ring-2 ring-blue-400': editMode }"
-    >
+    <el-button :type="editMode ? 'success' : 'info'" @click="handleEditModeChange">
       {{ editMode ? '编辑' : '浏览' }}
-    </button>
-    <button
-      class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors ml-2"
-      @click="handleClearCanvas"
-    >
-      清空画布
-    </button>
+    </el-button>
+    <el-button type="danger" @click="handleClearCanvas"> 清空画布 </el-button>
   </div>
 </template>
 

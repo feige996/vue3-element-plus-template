@@ -6,32 +6,28 @@
 
         <!-- 资产类型标签页 -->
         <div class="ml-8 flex">
-          <button
-            v-for="tab in assetTabs"
-            :key="tab.value"
-            :class="[
-              'px-4 py-1 text-sm font-medium transition-colors',
-              currentTab === tab.value
-                ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
-            ]"
-            @click="handleTabChange(tab.value)"
-          >
-            {{ tab.label }}
-          </button>
+          <el-button-group>
+            <el-button
+              v-for="tab in assetTabs"
+              :key="tab.value"
+              :type="currentTab === tab.value ? 'primary' : 'default'"
+              size="small"
+              @click="handleTabChange(tab.value)"
+            >
+              {{ tab.label }}
+            </el-button>
+          </el-button-group>
         </div>
       </div>
 
       <!-- 展开收起按钮 -->
-      <button
-        class="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+      <el-button
+        :icon="isExpanded ? ArrowUp : ArrowDown"
+        size="small"
         @click="isExpanded = !isExpanded"
       >
         {{ isExpanded ? '收起' : '展开' }}
-        <span class="ml-1">
-          {{ isExpanded ? '▲' : '▼' }}
-        </span>
-      </button>
+      </el-button>
     </div>
 
     <!-- 资产列表 -->
@@ -62,6 +58,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 
 // 展开收起状态
 const isExpanded = ref(true)
