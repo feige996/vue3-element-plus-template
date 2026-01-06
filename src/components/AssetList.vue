@@ -55,15 +55,14 @@
         >
           <CircleClose class="w-4 h-4" />
         </div>
-        <div class="h-[100px] w-[100px] flex items-center justify-center p-2 bg-gray-50">
-          <img
-            :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
-            :alt="asset.name"
-            :class="
-              asset.type === 'image' ? 'h-full w-auto object-contain' : 'w-full h-full object-cover'
-            "
-          />
-        </div>
+        <el-image
+          :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
+          :preview-src-list="[
+            asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail,
+          ]"
+          class="w-[100px] h-[100px] border border-gray-200 rounded bg-gray-50"
+          :fit="asset.type === 'image' ? 'contain' : 'cover'"
+        ></el-image>
         <div class="p-2 text-sm text-center truncate w-[100px]">
           {{ asset.name }}
         </div>
