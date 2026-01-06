@@ -30,11 +30,17 @@
           draggable="true"
           @dragstart="onDragStart($event, asset as any)"
         >
-          <img
-            :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
-            :alt="asset.name"
-            class="w-full h-32 object-cover"
-          />
+          <div class="h-32 flex items-center justify-center p-2 bg-gray-50">
+            <img
+              :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
+              :alt="asset.name"
+              :class="
+                asset.type === 'image'
+                  ? 'h-full w-auto object-contain'
+                  : 'w-full h-full object-cover'
+              "
+            />
+          </div>
           <div class="p-2 text-sm text-center">
             {{ asset.name }}
           </div>
@@ -552,35 +558,35 @@ const poseAssets = ref<Pose[]>([
     name: '站立姿势',
     type: 'pose',
     poseId: 'standing',
-    thumbnail: 'https://picsum.photos/300/300?random=21',
+    thumbnail: 'https://picsum.photos/800/800?random=21',
   },
   {
     id: 2,
     name: '挥手姿势',
     type: 'pose',
     poseId: 'waving',
-    thumbnail: 'https://picsum.photos/300/300?random=22',
+    thumbnail: 'https://picsum.photos/1920/1080?random=22',
   },
   {
     id: 3,
     name: '坐姿',
     type: 'pose',
     poseId: 'sitting',
-    thumbnail: 'https://picsum.photos/300/300?random=23',
+    thumbnail: 'https://picsum.photos/1080/1920?random=23',
   },
   {
     id: 4,
     name: '思考姿势',
     type: 'pose',
     poseId: 'thinking',
-    thumbnail: 'https://picsum.photos/300/300?random=24',
+    thumbnail: 'https://picsum.photos/1600/1200?random=24',
   },
   {
     id: 5,
     name: '跑步姿势',
     type: 'pose',
     poseId: 'running',
-    thumbnail: 'https://picsum.photos/300/300?random=25',
+    thumbnail: 'https://picsum.photos/1200/1600?random=25',
   },
   {
     id: 6,
@@ -597,31 +603,31 @@ const imageAssets = ref<Asset[]>([
     id: 1,
     name: '示例图片1',
     type: 'image',
-    url: 'https://picsum.photos/300/200?random=1',
+    url: 'https://picsum.photos/800/800?random=1',
   },
   {
     id: 2,
     name: '示例图片2',
     type: 'image',
-    url: 'https://picsum.photos/300/200?random=2',
+    url: 'https://picsum.photos/1920/1080?random=2',
   },
   {
     id: 3,
     name: '示例图片3',
     type: 'image',
-    url: 'https://picsum.photos/300/200?random=3',
+    url: 'https://picsum.photos/1080/1920?random=3',
   },
   {
     id: 4,
     name: '示例图片4',
     type: 'image',
-    url: 'https://picsum.photos/300/200?random=4',
+    url: 'https://picsum.photos/1600/1200?random=4',
   },
   {
     id: 5,
     name: '示例图片5',
     type: 'image',
-    url: 'https://picsum.photos/300/200?random=5',
+    url: 'https://picsum.photos/1200/1600?random=5',
   },
 ])
 
