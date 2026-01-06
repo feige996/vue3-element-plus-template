@@ -314,10 +314,17 @@
         </div>
         <!-- 生成结果区域 -->
         <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
-          <div class="flex gap-4 items-center mb-2">
-            <h3 class="text-sm font-medium text-gray-700">生成结果图片列表</h3>
+          <div class="flex gap-4 items-start mb-2">
+            <h3 class="text-sm font-medium text-gray-700 mt-1">生成结果图片列表</h3>
+            <el-input
+              v-model="userPrompt"
+              type="textarea"
+              placeholder="请输入提示语"
+              :rows="1"
+              class="w-64 text-xs"
+            ></el-input>
             <button
-              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
+              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors mt-1"
               @click="generateAIGCImage"
               :disabled="isAIGCLoading"
             >
@@ -763,6 +770,9 @@ const isAIGCLoading = ref(false)
 
 // 中文输入状态
 const isComposing = ref(false)
+
+// 用户输入的提示语
+const userPrompt = ref('根据参考图片生成高质量图像')
 
 // 画布引用
 const canvasRef = ref<HTMLElement | null>(null)
@@ -1648,7 +1658,7 @@ const generateAIGCImage = async () => {
       taskId: Math.random() * 100000000000000000,
       taskName: 'text2imgv2',
       prompt: {
-        zh: '图2中人物在图1中',
+        zh: userPrompt.value,
       },
       lora: 'nano-pro',
       trigger_prompt: {
