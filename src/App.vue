@@ -396,11 +396,11 @@
                   <!-- 状态文本 -->
                   <div class="mt-2 text-xs text-gray-500">
                     {{
-                      result.status === 0
+                      result.status === TaskStatusE.PENDING
                         ? '未开始'
-                        : result.status === 1
+                        : result.status === TaskStatusE.RUNNING
                           ? '生成中...'
-                          : result.status === 2
+                          : result.status === TaskStatusE.COMPLETED
                             ? '完成'
                             : '失败'
                     }}
@@ -721,7 +721,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import HumanFigure from './components/HumanFigure.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
-import { generateImage, getTaskStatus } from './utils/aigc'
+import { generateImage, getTaskStatus, TaskStatusE } from './utils/aigc'
 
 // 资产数据类型定义
 interface Asset {
@@ -880,7 +880,7 @@ interface GenerationResult {
   type: 'progress' | 'image'
   url?: string
   progress: number
-  status: number // 任务状态 0-未开始，1-进行中，2-已完成，3-失败
+  status: TaskStatusE // 任务状态
 }
 
 // 生成结果列表
@@ -1712,7 +1712,7 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
             generationResults.value[progressItemIndex].status = statusResponse.status
 
             // 检查任务状态
-            if (statusResponse.status === 2) {
+            if (statusResponse.status === TaskStatusE.COMPLETED) {
               // 任务已完成
               clearInterval(statusCheckInterval!)
               // 使用返回的预览地址
@@ -1727,7 +1727,7 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
                   type: 'image',
                   url: imageUrls[0],
                   progress: 100,
-                  status: 2,
+                  status: TaskStatusE.COMPLETED,
                 }
 
                 // 添加剩余的图片
@@ -1737,24 +1737,27 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
                     type: 'image',
                     url,
                     progress: 100,
-                    status: 2,
+                    status: TaskStatusE.COMPLETED,
                   }))
                   generationResults.value.push(...additionalImages)
                 }
               } else {
                 // 如果没有图片，标记为失败
-                generationResults.value[progressItemIndex].status = 3
+                generationResults.value[progressItemIndex].status = TaskStatusE.FAILED
               }
 
               resolve()
-            } else if (statusResponse.status === 3) {
+            } else if (statusResponse.status === TaskStatusE.FAILED) {
               // 任务失败
               clearInterval(statusCheckInterval!)
               // 更新进度项为失败状态
-              generationResults.value[progressItemIndex].status = 3
+              generationResults.value[progressItemIndex].status = TaskStatusE.FAILED
               console.error(`AI 图片生成失败: ${statusResponse.failedReason}`)
               reject(new Error(statusResponse.failedReason))
-            } else if (statusResponse.status === 0 || statusResponse.status === 1) {
+            } else if (
+              statusResponse.status === TaskStatusE.PENDING ||
+              statusResponse.status === TaskStatusE.RUNNING
+            ) {
               // 任务未开始或进行中，继续轮询
               console.log(`Task in progress: ${statusResponse.progress}%`)
             }
@@ -1838,7 +1841,7 @@ const generateAIGCImage = async () => {
         id: generationId,
         type: 'progress',
         progress: 0,
-        status: 1, // 1-进行中
+        status: TaskStatusE.RUNNING, // 进行中
       }
       generationResults.value.push(progressItem)
 

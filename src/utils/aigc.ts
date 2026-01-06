@@ -1,3 +1,11 @@
+// 任务状态枚举
+export enum TaskStatusE {
+  PENDING = 0, // 未开始
+  RUNNING = 1, // 进行中
+  COMPLETED = 2, // 已完成
+  FAILED = 3, // 失败
+}
+
 // 定义请求参数类型
 export interface AIGCPromptRequest {
   taskId: number // 工程侧任务id
@@ -28,7 +36,7 @@ export interface AIGCPromptResponse extends TaskStatusResponse {
 // 定义任务状态响应类型
 export interface TaskStatusResponse {
   taskId: number
-  status: number // 任务状态 0-未开始，1-进行中，2-已完成，3-失败
+  status: TaskStatusE // 任务状态
   code: number // 错误码，正常为200
   progress: number // 进度，0~100
   pendingNumbers: number // 排队数
