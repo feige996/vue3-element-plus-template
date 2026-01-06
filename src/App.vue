@@ -160,7 +160,12 @@
             <!-- 数字标元素 -->
             <div
               v-else-if="element.type === 'number'"
-              class="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full font-bold"
+              class="flex items-center justify-center text-white rounded-full font-bold"
+              :style="{
+                width: `${element.width || 32}px`,
+                height: `${element.height || 32}px`,
+                backgroundColor: element.backgroundColor || '#ef4444',
+              }"
             >
               {{ element.number }}
             </div>
@@ -338,6 +343,32 @@
                 v-model.number="selectedElement.number"
                 class="w-full p-1 border border-gray-300 rounded"
               />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">背景色</label>
+              <input
+                type="color"
+                v-model="selectedElement.backgroundColor"
+                class="w-full h-8 border border-gray-300 rounded"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">宽度</label>
+                <input
+                  type="number"
+                  v-model.number="selectedElement.width"
+                  class="w-full p-1 border border-gray-300 rounded"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">高度</label>
+                <input
+                  type="number"
+                  v-model.number="selectedElement.height"
+                  class="w-full p-1 border border-gray-300 rounded"
+                />
+              </div>
             </div>
           </div>
 
@@ -560,6 +591,7 @@ interface CanvasElement {
   name?: string
   content?: string
   color?: string
+  backgroundColor?: string // 背景色
   number?: number
   fontSize?: number // 字体大小
   aspectRatio?: number // 宽高比，仅用于图片和虚线框元素
@@ -1292,6 +1324,7 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
     content: element.content || '',
     rotation: element.rotation || 0,
     fontSize: element.fontSize || 16, // 默认字体大小
+    backgroundColor: element.backgroundColor || '#ef4444', // 默认背景色
     zIndex: elementZIndex,
     ...element,
   }
