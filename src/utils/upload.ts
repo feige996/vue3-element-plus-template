@@ -3,7 +3,6 @@ import { ElMessage } from 'element-plus'
 export interface UploadCosReqI {
   bizType: string // 支持text2img_style、audio_style、segment_mask、face_swap、gcimg-editrole、cooperator、attachment
   filename: string // 文件名称
-  taskId?: string // 任务id,有就传,没有不传
 }
 export interface ResDataI<T> {
   code: number
@@ -21,7 +20,6 @@ export function getPresignedUrl(data: UploadCosReqI): Promise<ResDataI<UploadCos
   const params = new URLSearchParams()
   if (data.bizType) params.append('bizType', data.bizType)
   if (data.filename) params.append('filename', data.filename)
-  if (data.taskId) params.append('taskId', data.taskId)
 
   // 拼接到URL上
   const url = `/backend/aigc/common/cos/getPresignedUrl?${params.toString()}`

@@ -272,16 +272,6 @@
               </span>
               <span v-else>生成截图</span>
             </button>
-            <button
-              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
-              @click="generateAIGCImage"
-              :disabled="isAIGCLoading || resultList.length === 0"
-            >
-              <span v-if="isAIGCLoading" class="flex items-center">
-                <span class="animate-spin mr-1">⏳</span> 生成中...
-              </span>
-              <span v-else>AI生成</span>
-            </button>
           </div>
           <div class="flex flex-wrap gap-4">
             <!-- 上传控件 -->
@@ -321,6 +311,16 @@
               <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
             </div>
           </div>
+          <button
+            class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
+            @click="generateAIGCImage"
+            :disabled="isAIGCLoading || resultList.length === 0"
+          >
+            <span v-if="isAIGCLoading" class="flex items-center">
+              <span class="animate-spin mr-1">⏳</span> 生成中...
+            </span>
+            <span v-else>AI生成</span>
+          </button>
         </div>
       </div>
     </div>
@@ -608,6 +608,7 @@ import HumanFigure from './components/HumanFigure.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
 import { generateImage, getTaskStatus } from './utils/aigc'
+import { getPresignedUrl } from './utils/upload'
 
 // 资产数据类型定义
 interface Asset {
@@ -1567,14 +1568,23 @@ const pollTaskStatus = async (promptId: string) => {
           if (statusResponse.status === 2) {
             // 任务已完成
             clearInterval(statusCheckInterval!)
-            // 构建生成的图片URL（根据cosPath）
-            // 注意：这里需要根据实际的cos访问规则构建URL
-            // 假设cosPath可以直接转换为访问URL
-            const imageUrl = `https://xxxx${statusResponse.cosPath}`
-            // 将生成的图片添加到结果列表
-            resultList.value.push(imageUrl)
-            alert('AI 图片生成成功！')
-            resolve()
+            try {
+              // 通过 getPresignedUrl 函数获取 cosUrl
+              const uploadInfo = await getPresignedUrl({
+                bizType: 'attachment',
+                filename: statusResponse.cosPath,
+              })
+              // 使用返回的预览地址
+              const imageUrl = uploadInfo.data.previewUrl
+              // 将生成的图片添加到结果列表
+              resultList.value.push(imageUrl)
+              alert('AI 图片生成成功！')
+              resolve()
+            } catch (error) {
+              console.error('Error getting presigned URL:', error)
+              alert('获取图片URL失败，请检查控制台日志')
+              reject(error)
+            }
           } else if (statusResponse.status === 3) {
             // 任务失败
             clearInterval(statusCheckInterval!)
