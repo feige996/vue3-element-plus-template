@@ -355,16 +355,72 @@
           <div class="flex flex-wrap gap-4">
             <div
               v-for="(result, index) in generationResults"
-              :key="index"
+              :key="result.id"
               class="flex flex-col items-center relative"
             >
               <div class="relative">
-                <el-image
-                  :src="result"
-                  :preview-src-list="[result]"
-                  class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
-                  fit="contain"
-                ></el-image>
+                <!-- 进度项 -->
+                <div
+                  v-if="result.type === 'progress'"
+                  class="w-24 h-24 border border-gray-200 rounded bg-gray-50 flex flex-col items-center justify-center"
+                >
+                  <div class="w-20 h-20 relative">
+                    <!-- 进度环 -->
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                      <!-- 背景圆 -->
+                      <path
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e6e6e6"
+                        stroke-width="3"
+                      />
+                      <!-- 进度圆 -->
+                      <path
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#6366f1"
+                        stroke-width="3"
+                        :stroke-dasharray="`${result.progress * 0.628} 31.831`"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    <!-- 进度文本 -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <span class="text-sm font-medium">{{ `${result.progress}%` }}</span>
+                    </div>
+                  </div>
+                  <!-- 状态文本 -->
+                  <div class="mt-2 text-xs text-gray-500">
+                    {{
+                      result.status === 0
+                        ? '未开始'
+                        : result.status === 1
+                          ? '生成中...'
+                          : result.status === 2
+                            ? '完成'
+                            : '失败'
+                    }}
+                  </div>
+                </div>
+
+                <!-- 图片项 -->
+                <div
+                  v-else-if="result.type === 'image'"
+                  class="w-24 h-24 border border-gray-200 rounded bg-gray-50 overflow-hidden"
+                >
+                  <el-image
+                    :src="result.url"
+                    :preview-src-list="[result.url!]"
+                    class="w-full h-full"
+                    fit="contain"
+                  ></el-image>
+                </div>
+
+                <!-- 删除按钮 -->
                 <button
                   class="absolute top-0 right-0 w-5 h-5 flex items-center justify-center bg-gray-500 text-white rounded-full -mt-1.5 -mr-1.5 hover:bg-gray-600 transition-colors z-10 text-xs"
                   @click.stop="deleteGenerationResult(index)"
@@ -818,8 +874,17 @@ const isComposing = ref(false)
 // 用户输入的提示语
 const userPrompt = ref('根据参考图片生成高质量图像')
 
+// 生成结果项类型
+interface GenerationResult {
+  id: string
+  type: 'progress' | 'image'
+  url?: string
+  progress: number
+  status: number // 任务状态 0-未开始，1-进行中，2-已完成，3-失败
+}
+
 // 生成结果列表
-const generationResults = ref<string[]>([])
+const generationResults = ref<GenerationResult[]>([])
 
 // 图片大小选择
 const imageSize = ref('2K') // 默认值为2K
@@ -1623,7 +1688,7 @@ const getCurrentDate = () => {
 }
 
 // 轮询任务状态
-const pollTaskStatus = async (promptId: string) => {
+const pollTaskStatus = async (promptId: string, generationId: string) => {
   let statusCheckInterval: number | null = null
 
   try {
@@ -1635,24 +1700,64 @@ const pollTaskStatus = async (promptId: string) => {
           const statusResponse = await getTaskStatus(promptId)
           console.log('Task status:', statusResponse)
 
-          // 检查任务状态
-          if (statusResponse.status === 2) {
-            // 任务已完成
-            clearInterval(statusCheckInterval!)
-            // 使用返回的预览地址
-            console.log('AI 图片生成成功 statusResponse:', statusResponse)
-            const imageUrl = statusResponse?.previewUrl || ''
-            // 将生成的图片添加到生成结果列表
-            generationResults.value.push(imageUrl)
-            resolve()
-          } else if (statusResponse.status === 3) {
-            // 任务失败
-            clearInterval(statusCheckInterval!)
-            console.error(`AI 图片生成失败: ${statusResponse.failedReason}`)
-            reject(new Error(statusResponse.failedReason))
-          } else if (statusResponse.status === 0 || statusResponse.status === 1) {
-            // 任务未开始或进行中，继续轮询
-            console.log(`Task in progress: ${statusResponse.progress}%`)
+          // 找到对应的进度项
+          const progressItemIndex = generationResults.value.findIndex(
+            (item) => item.id === generationId,
+          )
+
+          if (progressItemIndex !== -1) {
+            // 更新进度
+            generationResults.value[progressItemIndex].progress = statusResponse.progress
+            // 更新状态
+            generationResults.value[progressItemIndex].status = statusResponse.status
+
+            // 检查任务状态
+            if (statusResponse.status === 2) {
+              // 任务已完成
+              clearInterval(statusCheckInterval!)
+              // 使用返回的预览地址
+              console.log('AI 图片生成成功 statusResponse:', statusResponse)
+              const imageUrls = statusResponse?.imgUrls || []
+
+              // 替换进度项为图片项
+              if (imageUrls.length > 0) {
+                // 如果有多张图片，替换第一个，然后添加其他的
+                generationResults.value[progressItemIndex] = {
+                  id: generationId,
+                  type: 'image',
+                  url: imageUrls[0],
+                  progress: 100,
+                  status: 2,
+                }
+
+                // 添加剩余的图片
+                if (imageUrls.length > 1) {
+                  const additionalImages = imageUrls.slice(1).map((url, index) => ({
+                    id: `${generationId}-${index + 1}`,
+                    type: 'image',
+                    url,
+                    progress: 100,
+                    status: 2,
+                  }))
+                  generationResults.value.push(...additionalImages)
+                }
+              } else {
+                // 如果没有图片，标记为失败
+                generationResults.value[progressItemIndex].status = 3
+              }
+
+              resolve()
+            } else if (statusResponse.status === 3) {
+              // 任务失败
+              clearInterval(statusCheckInterval!)
+              // 更新进度项为失败状态
+              generationResults.value[progressItemIndex].status = 3
+              console.error(`AI 图片生成失败: ${statusResponse.failedReason}`)
+              reject(new Error(statusResponse.failedReason))
+            } else if (statusResponse.status === 0 || statusResponse.status === 1) {
+              // 任务未开始或进行中，继续轮询
+              console.log(`Task in progress: ${statusResponse.progress}%`)
+            }
           }
         } catch (error) {
           console.error('Error checking task status:', error)
@@ -1725,10 +1830,22 @@ const generateAIGCImage = async () => {
       const promptId = response.prompt_id
       console.log('AIGC API Response:', response)
 
+      // 创建一个唯一ID
+      const generationId = generateUUID()
+
+      // 添加进度项到生成结果列表
+      const progressItem: GenerationResult = {
+        id: generationId,
+        type: 'progress',
+        progress: 0,
+        status: 1, // 1-进行中
+      }
+      generationResults.value.push(progressItem)
+
       // 开始轮询任务状态
-      await pollTaskStatus(promptId)
+      await pollTaskStatus(promptId, generationId)
     } else {
-      alert(`AI 图片生成失败: ${response.message}`)
+      alert(`AI 图片生成失败: ${response.message || '未知错误'}`)
       isAIGCLoading.value = false
     }
 

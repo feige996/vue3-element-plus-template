@@ -35,7 +35,8 @@ export interface TaskStatusResponse {
   predictProcessSec: number // 处理任务预估还需要的时间
   failedReason: string // 失败原因
   cosPath: string // 上传路径
-  previewUrl: string // 预览地址
+  cosPaths: string[] // 预览地址
+  imgUrls: string[] // 预览图片地址，真正可以使用的图片地址
 }
 
 /**
