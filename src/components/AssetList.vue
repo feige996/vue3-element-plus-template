@@ -31,41 +31,47 @@
     </div>
 
     <!-- 资产列表 -->
-    <div v-show="isExpanded" class="flex gap-4 overflow-x-auto">
+    <div v-show="isExpanded" class="flex flex-wrap gap-4">
       <!-- 上传控件 -->
-      <ImageUpload
-        width="w-[100px]"
-        height="h-[100px]"
-        :upload-text="currentTab === 'images' ? '+上传图片' : '+上传姿势'"
-        @upload="handleUpload"
-      />
+      <el-upload
+        class="w-24 h-24 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
+        action="#"
+        :auto-upload="false"
+        :on-change="handleUpload"
+        :draggable="true"
+        :show-file-list="false"
+        accept="image/*"
+      >
+        <span class="text-xs text-gray-400">{{
+          currentTab === 'images' ? '+上传图片' : '+上传姿势'
+        }}</span>
+      </el-upload>
 
       <!-- 资产列表项 -->
       <div
         v-for="(asset, index) in filteredAssets"
         :key="index"
-        class="flex-shrink-0 cursor-move border border-gray-200 rounded hover:shadow-md transition-shadow relative"
-        draggable="true"
-        @dragstart="onDragStart($event, asset as any)"
+        class="flex flex-col items-center relative"
       >
-        <!-- 删除按钮 -->
-        <div
-          class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10 cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
-          @click.stop="handleDeleteAsset(index)"
-        >
-          <CircleClose class="w-4 h-4" />
+        <div class="relative">
+          <el-image
+            :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
+            :preview-src-list="[
+              asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail,
+            ]"
+            class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
+            :fit="asset.type === 'image' ? 'contain' : 'cover'"
+          ></el-image>
+          <div
+            class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10 cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
+            @click.stop="handleDeleteAsset(index)"
+          >
+            <CircleClose class="w-4 h-4" />
+          </div>
         </div>
-        <el-image
-          :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
-          :preview-src-list="[
-            asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail,
-          ]"
-          class="w-[100px] h-[100px] border border-gray-200 rounded bg-gray-50"
-          :fit="asset.type === 'image' ? 'contain' : 'cover'"
-        ></el-image>
-        <div class="p-2 text-sm text-center truncate w-[100px]">
-          {{ asset.name }}
-        </div>
+        <span class="text-xs text-gray-500 mt-1">{{
+          currentTab === 'images' ? `图片 ${index + 1}` : `姿势 ${index + 1}`
+        }}</span>
       </div>
     </div>
   </div>
@@ -74,7 +80,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { ArrowUp, ArrowDown, CircleClose } from '@element-plus/icons-vue'
-import ImageUpload from './ImageUpload.vue'
 import type { UploadFile } from 'element-plus'
 
 // 展开收起状态
@@ -114,7 +119,6 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits 定义
 const emit = defineEmits<{
   'tab-change': [tab: 'images' | 'poses']
-  'drag-start': [event: DragEvent, asset: CombinedAsset]
   upload: [file: UploadFile]
   'delete-asset': [index: number]
 }>()
@@ -141,28 +145,6 @@ const filteredAssets = computed(() => {
 const handleTabChange = (tab: 'images' | 'poses') => {
   currentTab.value = tab
   emit('tab-change', tab)
-}
-
-// 拖拽开始处理
-const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
-  if (event.dataTransfer) {
-    // 获取鼠标在缩略图上的相对位置
-    const target = event.target as HTMLElement
-    const rect = target.getBoundingClientRect()
-    const relativeX = event.clientX - rect.left
-    const relativeY = event.clientY - rect.top
-
-    // 将资产信息和相对位置一起存储
-    const dragData = {
-      asset,
-      relativeX,
-      relativeY,
-      thumbnailWidth: rect.width,
-      thumbnailHeight: rect.height,
-    }
-    event.dataTransfer.setData('asset', JSON.stringify(dragData))
-    emit('drag-start', event, asset)
-  }
 }
 
 // 处理上传
