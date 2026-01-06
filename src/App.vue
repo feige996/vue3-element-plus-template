@@ -100,158 +100,184 @@
           清空画布
         </button>
       </div>
-      <!-- 画布区域 -->
-      <div class="flex-1 bg-gray-200 p-4 overflow-hidden">
-        <div
-          ref="canvasRef"
-          class="w-full h-full bg-white border border-gray-300 relative"
-          @dragover.prevent
-          @drop="onDrop"
-          @click="onCanvasClick"
-          @mousedown="onCanvasMouseDown"
-          @mousemove="onCanvasMouseMove"
-          @mouseup="onCanvasMouseUp"
-          @mouseleave="onCanvasMouseUp"
-        >
-          <!-- 画布元素 -->
+
+      <!-- 画布和结果列表区域 -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- 画布区域 -->
+        <div class="flex-1 bg-gray-200 p-4 overflow-hidden">
           <div
-            v-for="element in canvasElements"
-            :key="element.id"
-            :class="['absolute', { 'ring-2 ring-blue-400': selectedElementId === element.id }]"
-            :style="getElementStyle(element)"
-            @click="activeTool ? onElementClick($event) : selectElement(element.id)"
-            @mousedown="onElementMouseDown($event, element)"
+            ref="canvasRef"
+            class="w-full h-full bg-white border border-gray-300 relative"
+            @dragover.prevent
+            @drop="onDrop"
+            @click="onCanvasClick"
+            @mousedown="onCanvasMouseDown"
+            @mousemove="onCanvasMouseMove"
+            @mouseup="onCanvasMouseUp"
+            @mouseleave="onCanvasMouseUp"
           >
-            <!-- 图片元素 -->
-            <img
-              v-if="element.type === 'image'"
-              :src="element.url"
-              :alt="element.name"
-              class="w-full h-full object-cover"
-              draggable="false"
-            />
-            <!-- 文本框元素 -->
+            <!-- 画布元素 -->
             <div
-              v-else-if="element.type === 'text'"
-              :data-element-id="element.id"
-              contenteditable="true"
-              class="w-full h-full p-2 outline-none cursor-text"
-              :placeholder="'输入文字'"
-              @input="updateTextContent($event, element.id)"
-              @compositionstart="onCompositionStart"
-              @compositionend="onCompositionEnd($event, element.id)"
-            ></div>
-            <!-- 矩形框元素 -->
+              v-for="element in canvasElements"
+              :key="element.id"
+              :class="['absolute', { 'ring-2 ring-blue-400': selectedElementId === element.id }]"
+              :style="getElementStyle(element)"
+              @click="activeTool ? onElementClick($event) : selectElement(element.id)"
+              @mousedown="onElementMouseDown($event, element)"
+            >
+              <!-- 图片元素 -->
+              <img
+                v-if="element.type === 'image'"
+                :src="element.url"
+                :alt="element.name"
+                class="w-full h-full object-cover"
+                draggable="false"
+              />
+              <!-- 文本框元素 -->
+              <div
+                v-else-if="element.type === 'text'"
+                :data-element-id="element.id"
+                contenteditable="true"
+                class="w-full h-full p-2 outline-none cursor-text"
+                :placeholder="'输入文字'"
+                @input="updateTextContent($event, element.id)"
+                @compositionstart="onCompositionStart"
+                @compositionend="onCompositionEnd($event, element.id)"
+              ></div>
+              <!-- 矩形框元素 -->
+              <div
+                v-else-if="element.type === 'rect'"
+                class="w-full h-full border-2 border-solid"
+                :style="{ borderColor: element.color, backgroundColor: 'transparent' }"
+              ></div>
+              <!-- 虚线框元素 -->
+              <div
+                v-else-if="element.type === 'dashed'"
+                class="w-full h-full border-2"
+                :style="{
+                  borderColor: '#000000',
+                  borderStyle: 'dashed',
+                  backgroundColor: 'transparent',
+                }"
+              ></div>
+              <!-- 数字标元素 -->
+              <div
+                v-else-if="element.type === 'number'"
+                class="flex items-center justify-center text-white rounded-full font-bold"
+                :style="{
+                  width: `${element.size || 32}px`,
+                  height: `${element.size || 32}px`,
+                  backgroundColor: element.backgroundColor || '#ef4444',
+                }"
+              >
+                {{ element.number }}
+              </div>
+
+              <!-- 人物元素 -->
+              <HumanFigure
+                v-else-if="element.type === 'human'"
+                :left="element.left"
+                :top="element.top"
+                :width="element.width || 150"
+                :height="element.height || 250"
+                :rotation="element.rotation || 0"
+                :figureType="element.figureType || 'cartoon'"
+                :pose="element.pose || 'standing'"
+                @select="selectElement(element.id)"
+                @jointMousedown="onHumanJointMouseDown($event, element)"
+              />
+
+              <!-- 缩放控制点 -->
+              <!-- 精简控制点，只保留右下侧se时的控制点 -->
+              <!--
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ left: '-6px', top: '-6px', cursor: 'nwse-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'nw')"
+              ></div>
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ left: 'calc(50% - 6px)', top: '-6px', cursor: 'ns-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'n')"
+              ></div>
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ right: '-6px', top: '-6px', cursor: 'nesw-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'ne')"
+              ></div>
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ left: '-6px', bottom: '-6px', cursor: 'nesw-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'sw')"
+              ></div>
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ left: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'w')"
+              ></div>
+
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ right: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'e')"
+              ></div>
+               <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ left: 'calc(50% - 6px)', bottom: '-6px', cursor: 'ns-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 's')"
+              ></div>
+              -->
+              <div
+                v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
+                class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
+                :style="{ right: '-6px', bottom: '-6px', cursor: 'nwse-resize' }"
+                @mousedown.stop="onResizeStart($event, element, 'se')"
+              ></div>
+            </div>
+
+            <!-- 临时绘制的矩形框 -->
             <div
-              v-else-if="element.type === 'rect'"
-              class="w-full h-full border-2 border-solid"
-              :style="{ borderColor: element.color, backgroundColor: 'transparent' }"
-            ></div>
-            <!-- 虚线框元素 -->
-            <div
-              v-else-if="element.type === 'dashed'"
-              class="w-full h-full border-2"
+              v-if="tempRect && isDrawingRect"
+              class="absolute border-2 border-dashed pointer-events-none"
               :style="{
-                borderColor: '#000000',
-                borderStyle: 'dashed',
+                left: `${tempRect.left}px`,
+                top: `${tempRect.top}px`,
+                width: `${tempRect.width}px`,
+                height: `${tempRect.height}px`,
+                borderColor: colorList[currentColorIndex],
                 backgroundColor: 'transparent',
               }"
             ></div>
-            <!-- 数字标元素 -->
-            <div
-              v-else-if="element.type === 'number'"
-              class="flex items-center justify-center text-white rounded-full font-bold"
-              :style="{
-                width: `${element.size || 32}px`,
-                height: `${element.size || 32}px`,
-                backgroundColor: element.backgroundColor || '#ef4444',
-              }"
-            >
-              {{ element.number }}
-            </div>
-
-            <!-- 人物元素 -->
-            <HumanFigure
-              v-else-if="element.type === 'human'"
-              :left="element.left"
-              :top="element.top"
-              :width="element.width || 150"
-              :height="element.height || 250"
-              :rotation="element.rotation || 0"
-              :figureType="element.figureType || 'cartoon'"
-              :pose="element.pose || 'standing'"
-              @select="selectElement(element.id)"
-              @jointMousedown="onHumanJointMouseDown($event, element)"
-            />
-
-            <!-- 缩放控制点 -->
-            <!-- 精简控制点，只保留右下侧se时的控制点 -->
-            <!--
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ left: '-6px', top: '-6px', cursor: 'nwse-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'nw')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ left: 'calc(50% - 6px)', top: '-6px', cursor: 'ns-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'n')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ right: '-6px', top: '-6px', cursor: 'nesw-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'ne')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ left: '-6px', bottom: '-6px', cursor: 'nesw-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'sw')"
-            ></div>
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ left: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'w')"
-            ></div>
-
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ right: '-6px', top: 'calc(50% - 6px)', cursor: 'ew-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'e')"
-            ></div>
-             <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ left: 'calc(50% - 6px)', bottom: '-6px', cursor: 'ns-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 's')"
-            ></div>
-            -->
-            <div
-              v-if="selectedElementId === element.id && editMode && element.type !== 'number'"
-              class="absolute w-3 h-3 bg-blue-600 border border-white rounded-full"
-              :style="{ right: '-6px', bottom: '-6px', cursor: 'nwse-resize' }"
-              @mousedown.stop="onResizeStart($event, element, 'se')"
-            ></div>
           </div>
+        </div>
 
-          <!-- 临时绘制的矩形框 -->
-          <div
-            v-if="tempRect && isDrawingRect"
-            class="absolute border-2 border-dashed pointer-events-none"
-            :style="{
-              left: `${tempRect.left}px`,
-              top: `${tempRect.top}px`,
-              width: `${tempRect.width}px`,
-              height: `${tempRect.height}px`,
-              borderColor: colorList[currentColorIndex],
-              backgroundColor: 'transparent',
-            }"
-          ></div>
+        <!-- 结果列表区域 -->
+        <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">结果列表</h3>
+          <div class="flex flex-wrap gap-4">
+            <div
+              v-for="(result, index) in resultList"
+              :key="index"
+              class="flex flex-col items-center"
+            >
+              <el-image
+                :src="result"
+                :preview-src-list="[result]"
+                class="w-24 h-24 object-cover border border-gray-200 rounded"
+              ></el-image>
+              <span class="text-xs text-gray-500 mt-1">{{ `结果 ${index + 1}` }}</span>
+            </div>
+            <div v-if="resultList.length === 0" class="text-center text-gray-500 w-full py-8">
+              暂无结果，点击截图按钮生成
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -734,6 +760,9 @@ const currentColorIndex = ref(0)
 
 // 当前数字标序号
 const currentNumber = ref(1)
+
+// 结果列表
+const resultList = ref<string[]>([])
 
 // 拖拽状态管理
 const isDragging = ref(false)
@@ -1505,6 +1534,9 @@ const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
 
     // 更新虚线框元素的截图数据
     dashedElement.screenshot = imageData
+
+    // 将截图添加到结果列表
+    resultList.value.push(imageData)
 
     // 发送给后端（这里是一个示例，您需要根据实际后端接口调整）
     console.log('截图数据:', {
