@@ -1627,16 +1627,15 @@ const pollTaskStatus = async (promptId: string) => {
             // 任务已完成
             clearInterval(statusCheckInterval!)
             // 使用返回的预览地址
-            console.log('statusResponse:', statusResponse)
+            console.log('AI 图片生成成功 statusResponse:', statusResponse)
             const imageUrl = statusResponse?.previewUrl || ''
             // 将生成的图片添加到生成结果列表
             generationResults.value.push(imageUrl)
-            alert('AI 图片生成成功！')
             resolve()
           } else if (statusResponse.status === 3) {
             // 任务失败
             clearInterval(statusCheckInterval!)
-            alert(`AI 图片生成失败: ${statusResponse.failedReason}`)
+            console.error(`AI 图片生成失败: ${statusResponse.failedReason}`)
             reject(new Error(statusResponse.failedReason))
           } else if (statusResponse.status === 0 || statusResponse.status === 1) {
             // 任务未开始或进行中，继续轮询
