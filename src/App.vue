@@ -1735,7 +1735,7 @@ const pollTaskStatus = async (promptId: string, generationId: string) => {
                 if (imageUrls.length > 1) {
                   const additionalImages = imageUrls.slice(1).map((url, index) => ({
                     id: `${generationId}-${index + 1}`,
-                    type: 'image',
+                    type: 'image' as const,
                     url,
                     progress: 100,
                     status: TaskStatusE.COMPLETED,
