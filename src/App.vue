@@ -301,7 +301,7 @@
                   fit="contain"
                 ></el-image>
                 <button
-                  class="absolute top-0 right-0 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full -mt-2 -mr-2 hover:bg-red-600 transition-colors z-10"
+                  class="absolute top-0 right-0 w-4 h-4 flex items-center justify-center bg-gray-400 text-white rounded-full outline-none border-none hover:bg-gray-500 transition-colors z-10 text-xs cursor-pointer"
                   @click.stop="deleteResult(index)"
                   title="删除"
                 >
