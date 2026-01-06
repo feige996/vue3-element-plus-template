@@ -296,12 +296,10 @@
               <el-image
                 :src="result"
                 :preview-src-list="[result]"
-                class="w-24 h-24 object-cover border border-gray-200 rounded"
+                class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
+                fit="contain"
               ></el-image>
               <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
-            </div>
-            <div v-if="resultList.length === 0" class="text-center text-gray-500 w-full py-8">
-              暂无结果，点击生成截图按钮或上传图片
             </div>
           </div>
         </div>
