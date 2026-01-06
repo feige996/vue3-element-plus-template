@@ -10,7 +10,8 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
-const VITE_PROXY_API_URL = 'http://10.200.16.127:8056'
+const BACKEND_API_URL = 'http://10.200.16.127:8056'
+const AIGC_API_URL = 'http://10.200.16.74:9890'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -54,9 +55,20 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: VITE_PROXY_API_URL,
+        target: AIGC_API_URL,
         changeOrigin: true,
-        rewrite: (path) => path.replace(new RegExp(`/api`), ''),
+        // rewrite: (path) => path.replace(new RegExp(`/api`), ''),
+        configure: (proxyServer) => {
+          proxyServer.on('proxyReq', (proxyReq, req) => {
+            const fullProxyPath = `${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`
+            console.log(`[Proxy Log]: ${req.method} ${req.url} -> ${fullProxyPath}`)
+          })
+        },
+      },
+      '/backend': {
+        target: BACKEND_API_URL,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(new RegExp(`/backend`), ''),
         configure: (proxyServer) => {
           proxyServer.on('proxyReq', (proxyReq, req) => {
             const fullProxyPath = `${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`

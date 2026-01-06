@@ -24,7 +24,7 @@ export function getPresignedUrl(data: UploadCosReqI): Promise<ResDataI<UploadCos
   if (data.taskId) params.append('taskId', data.taskId)
 
   // 拼接到URL上
-  const url = `/api/aigc/common/cos/getPresignedUrl?${params.toString()}`
+  const url = `/backend/aigc/common/cos/getPresignedUrl?${params.toString()}`
 
   return fetch(url, {
     method: 'GET',

@@ -597,6 +597,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import HumanFigure from './components/HumanFigure.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
+import { generateImage } from './utils/aigc'
 
 // 资产数据类型定义
 interface Asset {
