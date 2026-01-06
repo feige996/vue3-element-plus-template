@@ -269,6 +269,7 @@
               :auto-upload="false"
               :on-change="handleUpload"
               :draggable="true"
+              :show-file-list="false"
               accept="image/*"
             >
               <el-icon class="text-gray-400"><Plus /></el-icon>
@@ -286,7 +287,7 @@
                 :preview-src-list="[result]"
                 class="w-24 h-24 object-cover border border-gray-200 rounded"
               ></el-image>
-              <span class="text-xs text-gray-500 mt-1">{{ `结果 ${index + 1}` }}</span>
+              <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
             </div>
             <div v-if="resultList.length === 0" class="text-center text-gray-500 w-full py-8">
               暂无结果，点击截图按钮生成或上传图片
