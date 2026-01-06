@@ -60,7 +60,6 @@ export async function uploadFile(options: UploadOptionsI): Promise<UploadCosResI
       'content-type': options.file.type,
     },
   })
-  console.log('response', response)
 
   if (!response.ok) {
     throw new Error(`Upload failed with status: ${response.status}`)

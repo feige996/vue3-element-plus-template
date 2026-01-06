@@ -19,17 +19,47 @@ export interface AIGCPromptRequest {
 }
 
 // 定义响应类型
-export interface AIGCPromptResponse {
+export interface AIGCPromptResponse extends TaskStatusResponse {
   code: number
   message: string
-  data?: {
-    pendingNumbers: number
-    predictProcessSec: number
-    progress: number
-    prompt_id: string
-    status: number
-    suggest_action: string
-    suggestion: string
+  prompt_id: string
+}
+
+// 定义任务状态响应类型
+export interface TaskStatusResponse {
+  taskId: number
+  status: number // 任务状态 0-未开始，1-进行中，2-已完成，3-失败
+  code: number // 错误码，正常为200
+  progress: number // 进度，0~100
+  pendingNumbers: number // 排队数
+  predictProcessSec: number // 处理任务预估还需要的时间
+  failedReason: string // 失败原因
+  cosPath: string // 上传路径
+}
+
+/**
+ * 查询 AIGC 任务状态
+ * @param promptId 任务的 prompt_id
+ * @returns 任务状态响应
+ */
+export async function getTaskStatus(promptId: string): Promise<TaskStatusResponse> {
+  try {
+    const response = await fetch(`/api/v2/image_generation/history/${promptId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status: ${response.status}`)
+    }
+
+    const data = (await response.json()) as TaskStatusResponse
+    return data
+  } catch (error) {
+    console.error('Error calling AIGC status API:', error)
+    throw error
   }
 }
 

@@ -607,7 +607,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import HumanFigure from './components/HumanFigure.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
-import { generateImage } from './utils/aigc'
+import { generateImage, getTaskStatus } from './utils/aigc'
 
 // 资产数据类型定义
 interface Asset {
@@ -1550,6 +1550,54 @@ const getCurrentDate = () => {
   return new Date().toISOString().split('T')[0]
 }
 
+// 轮询任务状态
+const pollTaskStatus = async (promptId: string) => {
+  let statusCheckInterval: number | null = null
+
+  try {
+    // 创建一个Promise来处理轮询
+    await new Promise<void>((resolve, reject) => {
+      statusCheckInterval = setInterval(async () => {
+        try {
+          // 查询任务状态
+          const statusResponse = await getTaskStatus(promptId)
+          console.log('Task status:', statusResponse)
+
+          // 检查任务状态
+          if (statusResponse.status === 2) {
+            // 任务已完成
+            clearInterval(statusCheckInterval!)
+            // 构建生成的图片URL（根据cosPath）
+            // 注意：这里需要根据实际的cos访问规则构建URL
+            // 假设cosPath可以直接转换为访问URL
+            const imageUrl = `https://xxxx${statusResponse.cosPath}`
+            // 将生成的图片添加到结果列表
+            resultList.value.push(imageUrl)
+            alert('AI 图片生成成功！')
+            resolve()
+          } else if (statusResponse.status === 3) {
+            // 任务失败
+            clearInterval(statusCheckInterval!)
+            alert(`AI 图片生成失败: ${statusResponse.failedReason}`)
+            reject(new Error(statusResponse.failedReason))
+          } else if (statusResponse.status === 0 || statusResponse.status === 1) {
+            // 任务未开始或进行中，继续轮询
+            console.log(`Task in progress: ${statusResponse.progress}%`)
+          }
+        } catch (error) {
+          console.error('Error checking task status:', error)
+          // 继续轮询，不中断
+        }
+      }, 5000) // 每5秒查询一次
+    })
+  } finally {
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval)
+    }
+    isAIGCLoading.value = false
+  }
+}
+
 // 调用 AIGC 接口生成图片
 const generateAIGCImage = async () => {
   // 检查结果列表是否为空
@@ -1562,7 +1610,6 @@ const generateAIGCImage = async () => {
     isAIGCLoading.value = true
 
     // 生成唯一ID
-    const taskId = parseInt(generateUUID().replace(/-/g, '').substring(0, 10))
     const uuid = generateUUID()
     const currentDate = getCurrentDate()
 
@@ -1604,12 +1651,15 @@ const generateAIGCImage = async () => {
     const response = await generateImage(request)
 
     // 处理响应
-    if (response.code === 0 && response.data?.imageUrl) {
-      // 将生成的图片添加到结果列表
-      resultList.value.push(response.data.imageUrl)
-      alert('AI 图片生成成功！')
+    if (response.code === 200 && response?.prompt_id) {
+      const promptId = response.prompt_id
+      console.log('AIGC API Response:', response)
+
+      // 开始轮询任务状态
+      await pollTaskStatus(promptId)
     } else {
       alert(`AI 图片生成失败: ${response.message}`)
+      isAIGCLoading.value = false
     }
 
     console.log('AIGC API Response:', response)
@@ -1659,7 +1709,7 @@ const captureAndSendScreenshot = async (dashedElement: CanvasElement) => {
 
     // 将 base64 转换为 File 对象
     const base64ToFile = (dataUrl: string, filename: string) => {
-      const arr = dataUrl.split(',')
+      const arr = dataUrl.split(',') as [string, string]
       const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
       const bstr = atob(arr[1])
       let n = bstr.length
