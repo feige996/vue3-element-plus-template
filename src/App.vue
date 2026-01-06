@@ -313,26 +313,61 @@
           </div>
         </div>
         <!-- 生成结果区域 -->
-        <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
-          <div class="flex gap-4 items-start mb-2">
-            <h3 class="text-sm font-medium text-gray-700 mt-1">生成结果图片列表</h3>
+        <div class="h-80 bg-white border-t border-gray-200 p-4 overflow-y-auto">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">生成结果图片列表</h3>
+
+          <!-- 提示语输入框 -->
+          <div class="mb-4">
             <el-input
               v-model="userPrompt"
               type="textarea"
               placeholder="请输入提示语"
-              :rows="1"
-              class="w-64 text-xs"
+              :rows="4"
+              class="w-full text-xs"
             ></el-input>
+          </div>
+
+          <!-- AI生成按钮 -->
+          <div class="mb-4">
             <button
-              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors mt-1"
+              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
               @click="generateAIGCImage"
-              :disabled="isAIGCLoading"
+              :disabled="isAIGCLoading || resultList.length === 0"
             >
               <span v-if="isAIGCLoading" class="flex items-center">
                 <span class="animate-spin mr-1">⏳</span> 生成中...
               </span>
               <span v-else>AI生成</span>
             </button>
+          </div>
+
+          <!-- 生成结果列表 -->
+          <div class="flex flex-wrap gap-4">
+            <div
+              v-for="(result, index) in generationResults"
+              :key="index"
+              class="flex flex-col items-center relative"
+            >
+              <div class="relative">
+                <el-image
+                  :src="result"
+                  :preview-src-list="[result]"
+                  class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
+                  fit="contain"
+                ></el-image>
+                <button
+                  class="absolute top-0 right-0 w-5 h-5 flex items-center justify-center bg-gray-500 text-white rounded-full -mt-1.5 -mr-1.5 hover:bg-gray-600 transition-colors z-10 text-xs"
+                  @click.stop="deleteGenerationResult(index)"
+                  title="删除"
+                >
+                  ×
+                </button>
+              </div>
+              <span class="text-xs text-gray-500 mt-1">{{ `生成结果 ${index + 1}` }}</span>
+            </div>
+            <div v-if="generationResults.length === 0" class="text-center text-gray-500 py-4">
+              暂无生成结果
+            </div>
           </div>
         </div>
       </div>
@@ -621,7 +656,6 @@ import HumanFigure from './components/HumanFigure.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
 import { generateImage, getTaskStatus } from './utils/aigc'
-import { getPresignedUrl } from './utils/upload'
 
 // 资产数据类型定义
 interface Asset {
@@ -774,6 +808,9 @@ const isComposing = ref(false)
 // 用户输入的提示语
 const userPrompt = ref('根据参考图片生成高质量图像')
 
+// 生成结果列表
+const generationResults = ref<string[]>([])
+
 // 画布引用
 const canvasRef = ref<HTMLElement | null>(null)
 
@@ -820,6 +857,11 @@ const generateScreenshot = () => {
 // 删除结果列表中的图片
 const deleteResult = (index: number) => {
   resultList.value.splice(index, 1)
+}
+
+// 删除生成结果列表中的图片
+const deleteGenerationResult = (index: number) => {
+  generationResults.value.splice(index, 1)
 }
 
 // 拖拽状态管理
@@ -1584,23 +1626,13 @@ const pollTaskStatus = async (promptId: string) => {
           if (statusResponse.status === 2) {
             // 任务已完成
             clearInterval(statusCheckInterval!)
-            try {
-              // 通过 getPresignedUrl 函数获取 cosUrl
-              const uploadInfo = await getPresignedUrl({
-                bizType: 'attachment',
-                filename: statusResponse.cosPath,
-              })
-              // 使用返回的预览地址
-              const imageUrl = uploadInfo.data.previewUrl
-              // 将生成的图片添加到结果列表
-              resultList.value.push(imageUrl)
-              alert('AI 图片生成成功！')
-              resolve()
-            } catch (error) {
-              console.error('Error getting presigned URL:', error)
-              alert('获取图片URL失败，请检查控制台日志')
-              reject(error)
-            }
+            // 使用返回的预览地址
+            console.log('statusResponse:', statusResponse)
+            const imageUrl = statusResponse?.previewUrl || ''
+            // 将生成的图片添加到生成结果列表
+            generationResults.value.push(imageUrl)
+            alert('AI 图片生成成功！')
+            resolve()
           } else if (statusResponse.status === 3) {
             // 任务失败
             clearInterval(statusCheckInterval!)
