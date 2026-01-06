@@ -62,12 +62,12 @@
             class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
             :fit="asset.type === 'image' ? 'contain' : 'cover'"
           ></el-image>
-          <div
+          <!-- <div
             class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10 cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
             @click.stop="handleDeleteAsset(index)"
           >
             <CircleClose class="w-4 h-4" />
-          </div>
+          </div> -->
         </div>
         <span class="text-xs text-gray-500 mt-1">{{
           currentTab === 'images' ? `图片 ${index + 1}` : `姿势 ${index + 1}`
