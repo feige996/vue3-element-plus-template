@@ -49,14 +49,12 @@
         @dragstart="onDragStart($event, asset as any)"
       >
         <!-- 删除按钮 -->
-        <el-button
-          type="danger"
-          :icon="Close"
-          circle
-          size="small"
-          class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10"
+        <div
+          class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10 cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
           @click.stop="handleDeleteAsset(index)"
-        />
+        >
+          <CircleClose class="w-4 h-4" />
+        </div>
         <div class="h-[100px] w-[100px] flex items-center justify-center p-2 bg-gray-50">
           <img
             :src="asset.type === 'image' ? (asset as Asset).url : (asset as Pose).thumbnail"
@@ -75,8 +73,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ArrowUp, ArrowDown, Close } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
+import { ArrowUp, ArrowDown, CircleClose } from '@element-plus/icons-vue'
 import ImageUpload from './ImageUpload.vue'
 import type { UploadFile } from 'element-plus'
 

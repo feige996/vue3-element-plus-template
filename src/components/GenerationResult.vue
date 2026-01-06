@@ -106,14 +106,12 @@
           </div>
 
           <!-- 删除按钮 -->
-          <el-button
-            type="danger"
-            :icon="Close"
-            circle
-            size="small"
-            class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10"
+          <div
+            class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10 cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
             @click.stop="handleDeleteGenerationResult(index)"
-          />
+          >
+            <CircleClose class="w-4 h-4" />
+          </div>
         </div>
         <span class="text-xs text-gray-500 mt-1">{{ `生成结果 ${index + 1}` }}</span>
       </div>
@@ -126,7 +124,7 @@
 
 <script setup lang="ts">
 // 组件名称：GenerationResultContainer（避免单词组件名警告）
-import { Close } from '@element-plus/icons-vue'
+import { CircleClose } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { TaskStatusE } from '../utils/aigc'
 
