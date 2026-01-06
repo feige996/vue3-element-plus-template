@@ -311,16 +311,22 @@
               <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
             </div>
           </div>
-          <button
-            class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
-            @click="generateAIGCImage"
-            :disabled="isAIGCLoading || resultList.length === 0"
-          >
-            <span v-if="isAIGCLoading" class="flex items-center">
-              <span class="animate-spin mr-1">⏳</span> 生成中...
-            </span>
-            <span v-else>AI生成</span>
-          </button>
+        </div>
+        <!-- 生成结果区域 -->
+        <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
+          <div class="flex gap-4 items-center mb-2">
+            <h3 class="text-sm font-medium text-gray-700">生成结果图片列表</h3>
+            <button
+              class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600 transition-colors"
+              @click="generateAIGCImage"
+              :disabled="isAIGCLoading"
+            >
+              <span v-if="isAIGCLoading" class="flex items-center">
+                <span class="animate-spin mr-1">⏳</span> 生成中...
+              </span>
+              <span v-else>AI生成</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
