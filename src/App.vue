@@ -260,7 +260,19 @@
 
         <!-- 结果列表区域 -->
         <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">结果列表</h3>
+          <div class="flex gap-4 items-center mb-2">
+            <h3 class="text-sm font-medium text-gray-700">结果列表</h3>
+            <button
+              class="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+              @click="generateScreenshot"
+              :disabled="isScreenshotLoading"
+            >
+              <span v-if="isScreenshotLoading" class="flex items-center">
+                <span class="animate-spin mr-1">⏳</span> 生成中...
+              </span>
+              <span v-else>生成截图</span>
+            </button>
+          </div>
           <div class="flex flex-wrap gap-4">
             <!-- 上传控件 -->
             <el-upload
@@ -287,6 +299,9 @@
                 class="w-24 h-24 object-cover border border-gray-200 rounded"
               ></el-image>
               <span class="text-xs text-gray-500 mt-1">{{ `图片 ${index + 1}` }}</span>
+            </div>
+            <div v-if="resultList.length === 0" class="text-center text-gray-500 w-full py-8">
+              暂无结果，点击生成截图按钮或上传图片
             </div>
           </div>
         </div>
@@ -470,47 +485,6 @@
                 class="w-full p-1 border border-gray-300 rounded bg-gray-50"
                 readonly
               />
-            </div>
-
-            <div class="mt-6 mb-4">
-              <button
-                class="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                @click="captureAndSendScreenshot(selectedElement)"
-                :disabled="isScreenshotLoading"
-              >
-                <span v-if="isScreenshotLoading" class="flex items-center justify-center">
-                  <span class="animate-spin mr-2">⏳</span> 截图中...
-                </span>
-                <span v-else>重新截图</span>
-              </button>
-            </div>
-
-            <!-- 截图预览，放在最下面 -->
-            <div class="mt-6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">截图预览</label>
-              <div class="border border-gray-300 rounded p-2 bg-gray-50 relative">
-                <!-- 截图loading状态 -->
-                <div
-                  v-if="isScreenshotLoading"
-                  class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded"
-                >
-                  <div class="flex flex-col items-center">
-                    <span class="animate-spin text-2xl mb-2">⏳</span>
-                    <span class="text-sm text-gray-600">截图生成中...</span>
-                  </div>
-                </div>
-
-                <!-- 截图内容 -->
-                <img
-                  v-if="selectedElement.screenshot"
-                  :src="selectedElement.screenshot"
-                  alt="截图预览"
-                  class="w-full h-auto rounded"
-                />
-                <div v-else-if="!isScreenshotLoading" class="text-center text-gray-400 py-8">
-                  点击"重新截图"按钮生成截图
-                </div>
-              </div>
             </div>
           </div>
 
@@ -778,13 +752,23 @@ const resultList = ref<string[]>([])
 
 // 文件上传处理
 const handleUpload = (file: UploadFile) => {
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const imageData = e.target?.result as string
-    resultList.value.push(imageData)
+  // 确保file.raw存在且是File类型
+  if (file?.raw && file.raw instanceof File) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageData = e.target?.result as string
+      resultList.value.push(imageData)
+    }
+    reader.readAsDataURL(file.raw)
   }
-  if (file?.raw) {
-    reader.readAsDataURL(file?.raw)
+}
+
+// 生成截图
+const generateScreenshot = () => {
+  // 找到虚线框元素
+  const dashedElement = canvasElements.value.find((el) => el.type === 'dashed')
+  if (dashedElement) {
+    captureAndSendScreenshot(dashedElement)
   }
 }
 
