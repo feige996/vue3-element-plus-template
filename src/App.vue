@@ -259,9 +259,9 @@
         </div>
 
         <!-- 结果列表区域 -->
-        <div class="h-48 bg-white border-t border-gray-200 p-4 overflow-y-auto">
+        <div class="bg-white border-t border-gray-200 p-4 overflow-y-auto">
           <div class="flex gap-4 items-center mb-2">
-            <h3 class="text-sm font-medium text-gray-700">结果列表</h3>
+            <h3 class="text-sm font-medium text-gray-700">传递给算法的图片列表</h3>
             <button
               class="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
               @click="generateScreenshot"
@@ -314,16 +314,15 @@
         </div>
         <!-- 生成结果区域 -->
         <div class="h-80 bg-white border-t border-gray-200 p-4 overflow-y-auto">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">生成结果图片列表</h3>
-
           <!-- 提示语输入框 -->
           <div class="mb-4">
+            <span>提示词：</span>
             <el-input
               v-model="userPrompt"
               type="textarea"
               placeholder="请输入提示语"
               :rows="4"
-              class="w-full text-xs"
+              class="text-xs"
             ></el-input>
           </div>
 
@@ -340,6 +339,7 @@
               <span v-else>AI生成</span>
             </button>
           </div>
+          <h3 class="text-sm font-medium text-gray-700 mb-2">生成结果图片列表</h3>
 
           <!-- 生成结果列表 -->
           <div class="flex flex-wrap gap-4">
