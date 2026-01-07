@@ -1,6 +1,8 @@
 <template>
   <div class="w-64 bg-white border-l border-gray-200 overflow-hidden">
-    <h2 class="p-4 text-lg font-semibold bg-gray-50 border-b border-gray-200">属性面板</h2>
+    <h2 class="p-4 text-lg font-semibold bg-gray-100 border-b rounded-r border-gray-200 m-0">
+      属性面板
+    </h2>
     <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-60px)]">
       <div v-if="localElement">
         <div class="mb-4">
