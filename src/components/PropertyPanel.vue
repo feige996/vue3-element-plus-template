@@ -5,12 +5,6 @@
     </h2>
     <div class="p-4 space-y-4 overflow-y-auto h-[calc(100%-60px)]">
       <div v-if="localElement">
-        <div class="mb-4">
-          <el-button type="danger" class="w-full" @click="handleDeleteElement">
-            删除元素
-          </el-button>
-        </div>
-
         <div v-if="localElement.type === 'rect'">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
@@ -264,6 +258,12 @@
               <span class="text-sm text-gray-500">°</span>
             </div>
           </div>
+        </div>
+
+        <div v-if="localElement.type !== 'dashed'" class="mt-4">
+          <el-button type="danger" class="w-full" @click="handleDeleteElement">
+            删除元素
+          </el-button>
         </div>
       </div>
       <div v-else class="text-center text-gray-500 py-8">请选择一个元素</div>
