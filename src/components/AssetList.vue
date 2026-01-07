@@ -90,6 +90,9 @@
 import { ref, computed } from 'vue'
 import { ArrowUp, ArrowDown, CircleClose, View, Hide } from '@element-plus/icons-vue'
 import type { UploadFile } from 'element-plus'
+import { uploadFile } from '../utils/upload'
+import type { Pose, Asset, CombinedAsset } from '../typing'
+import { defaultPoseAssets, defaultImageAssets } from '../data'
 
 // 展开收起状态
 const isExpanded = ref(true)
@@ -97,105 +100,33 @@ const isExpanded = ref(true)
 // 显示删除按钮状态
 const showDeleteButtons = ref(false)
 
-// 资产数据类型定义
-interface Asset {
-  id: number
-  name: string
-  type: 'image'
-  url: string
+// 从 localStorage 加载资产
+const loadAssetsFromLocalStorage = <T,>(key: string, defaultValue: T[]): T[] => {
+  try {
+    const stored = localStorage.getItem(key)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('从 localStorage 加载资产失败:', error)
+  }
+  return defaultValue
 }
 
-// 预设姿势类型定义
-interface Pose {
-  id: number
-  name: string
-  type: 'pose'
-  poseId: string
-  thumbnail: string
+// 保存资产到 localStorage
+const saveAssetsToLocalStorage = <T,>(key: string, assets: T[]): void => {
+  try {
+    localStorage.setItem(key, JSON.stringify(assets))
+  } catch (error) {
+    console.error('保存资产到 localStorage 失败:', error)
+  }
 }
-
-// 合并资产类型
-type CombinedAsset = Asset | Pose
 
 // 人物姿势库
-const poseAssets = ref<Pose[]>([
-  {
-    id: 1,
-    name: '站立姿势',
-    type: 'pose',
-    poseId: 'standing',
-    thumbnail: 'https://picsum.photos/800/800?random=21',
-  },
-  {
-    id: 2,
-    name: '挥手姿势',
-    type: 'pose',
-    poseId: 'waving',
-    thumbnail: 'https://picsum.photos/1920/1080?random=22',
-  },
-  {
-    id: 3,
-    name: '坐姿',
-    type: 'pose',
-    poseId: 'sitting',
-    thumbnail: 'https://picsum.photos/1080/1920?random=23',
-  },
-  {
-    id: 4,
-    name: '思考姿势',
-    type: 'pose',
-    poseId: 'thinking',
-    thumbnail: 'https://picsum.photos/1600/1200?random=24',
-  },
-  {
-    id: 5,
-    name: '跑步姿势',
-    type: 'pose',
-    poseId: 'running',
-    thumbnail: 'https://picsum.photos/1200/1600?random=25',
-  },
-  {
-    id: 6,
-    name: '跳跃姿势',
-    type: 'pose',
-    poseId: 'jumping',
-    thumbnail: 'https://picsum.photos/300/300?random=26',
-  },
-])
+const poseAssets = ref<Pose[]>(loadAssetsFromLocalStorage('poseAssets', defaultPoseAssets))
 
 // 图片资产
-const imageAssets = ref<Asset[]>([
-  {
-    id: 1,
-    name: '示例图片1',
-    type: 'image',
-    url: 'https://picsum.photos/800/800?random=1',
-  },
-  {
-    id: 2,
-    name: '示例图片2',
-    type: 'image',
-    url: 'https://picsum.photos/1920/1080?random=2',
-  },
-  {
-    id: 3,
-    name: '示例图片3',
-    type: 'image',
-    url: 'https://picsum.photos/1080/1920?random=3',
-  },
-  {
-    id: 4,
-    name: '示例图片4',
-    type: 'image',
-    url: 'https://picsum.photos/1600/1200?random=4',
-  },
-  {
-    id: 5,
-    name: '示例图片5',
-    type: 'image',
-    url: 'https://picsum.photos/1200/1600?random=5',
-  },
-])
+const imageAssets = ref<Asset[]>(loadAssetsFromLocalStorage('imageAssets', defaultImageAssets))
 
 // Props 定义
 interface Props {
@@ -259,28 +190,38 @@ const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
 }
 
 // 处理上传
-const handleUpload = (file: UploadFile) => {
-  // 这里可以添加上传逻辑，目前只需要处理本地状态
-  // 实际项目中可能需要上传到服务器
-  if (file.raw) {
-    const previewUrl = URL.createObjectURL(file.raw)
-    if (currentTab.value === 'images') {
-      const newAsset: Asset = {
-        id: Date.now(),
-        name: file.raw.name,
-        type: 'image',
-        url: previewUrl,
+const handleUpload = async (file: UploadFile) => {
+  if (file?.raw && file.raw instanceof File) {
+    try {
+      const uploadInfo = await uploadFile({
+        filename: file.raw.name,
+        file: file.raw,
+      })
+
+      if (currentTab.value === 'images') {
+        const newAsset: Asset = {
+          id: Date.now(),
+          name: file.raw.name,
+          type: 'image',
+          url: uploadInfo.previewUrl,
+        }
+        imageAssets.value.unshift(newAsset)
+        // 保存所有资产到 localStorage，保持当前顺序
+        saveAssetsToLocalStorage('imageAssets', imageAssets.value)
+      } else {
+        const newPose: Pose = {
+          id: Date.now(),
+          name: file.raw.name,
+          type: 'pose',
+          poseId: `custom-${Date.now()}`,
+          thumbnail: uploadInfo.previewUrl,
+        }
+        poseAssets.value.unshift(newPose)
+        // 保存所有资产到 localStorage，保持当前顺序
+        saveAssetsToLocalStorage('poseAssets', poseAssets.value)
       }
-      imageAssets.value.unshift(newAsset)
-    } else {
-      const newPose: Pose = {
-        id: Date.now(),
-        name: file.raw.name,
-        type: 'pose',
-        poseId: `custom-${Date.now()}`,
-        thumbnail: previewUrl,
-      }
-      poseAssets.value.unshift(newPose)
+    } catch (error) {
+      console.error('上传失败:', error)
     }
   }
 }
@@ -289,8 +230,12 @@ const handleUpload = (file: UploadFile) => {
 const handleDeleteAsset = (index: number) => {
   if (currentTab.value === 'images') {
     imageAssets.value.splice(index, 1)
+    // 保存所有资产到 localStorage，保持当前顺序
+    saveAssetsToLocalStorage('imageAssets', imageAssets.value)
   } else {
     poseAssets.value.splice(index, 1)
+    // 保存所有资产到 localStorage，保持当前顺序
+    saveAssetsToLocalStorage('poseAssets', poseAssets.value)
   }
 }
 </script>
