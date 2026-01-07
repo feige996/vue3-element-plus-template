@@ -68,6 +68,7 @@
         @generate-screenshot="generateScreenshot"
         @upload="handleUpload"
         @delete-result="deleteResult"
+        @drop-asset="handleDropAsset"
       />
 
       <!-- AI生成结果 -->
@@ -93,14 +94,7 @@ import PropertyPanel from './components/PropertyPanel.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
 import { generateImage, getTaskStatus, TaskStatusE } from './utils/aigc'
-
-// 资产数据类型定义
-interface Asset {
-  id: number
-  name: string
-  type: 'image'
-  url: string
-}
+import type { CombinedAsset } from './typing'
 
 // 画布元素数据类型定义
 interface CanvasElement {
@@ -125,18 +119,6 @@ interface CanvasElement {
   pose?: string
   zIndex?: number
 }
-
-// 预设姿势类型定义
-interface Pose {
-  id: number
-  name: string
-  type: 'pose'
-  poseId: string
-  thumbnail: string
-}
-
-// 合并资产类型
-type CombinedAsset = Asset | Pose
 
 // 画布元素列表
 const canvasElements = ref<CanvasElement[]>([])
@@ -441,6 +423,24 @@ const deleteResult = (index: number) => {
 // 删除生成结果列表中的图片
 const deleteGenerationResult = (index: number) => {
   generationResults.value.splice(index, 1)
+}
+
+// 处理拖拽资产
+const handleDropAsset = (asset: CombinedAsset) => {
+  if (asset) {
+    // 根据资产类型获取图片URL
+    let imageUrl = ''
+    if (asset.type === 'image') {
+      imageUrl = asset.url
+    } else if (asset.type === 'pose') {
+      imageUrl = asset.thumbnail
+    }
+
+    // 如果获取到了图片URL，则添加到结果列表
+    if (imageUrl) {
+      resultList.value.push(imageUrl)
+    }
+  }
 }
 
 // 生成唯一ID（兼容处理）

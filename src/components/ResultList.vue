@@ -21,6 +21,10 @@
         :draggable="true"
         :show-file-list="false"
         accept="image/*"
+        @drop="handleDrop"
+        @dragover.prevent
+        @dragenter.prevent
+        @dragleave.prevent
       >
         <span class="text-xs text-gray-400">+上传图片</span>
       </el-upload>
@@ -55,6 +59,7 @@
 // 组件名称：ResultListContainer（避免单词组件名警告）
 import { CircleClose } from '@element-plus/icons-vue'
 import type { UploadFile } from 'element-plus'
+import type { CombinedAsset } from '../typing'
 
 // Props 定义
 interface Props {
@@ -71,6 +76,7 @@ const emit = defineEmits<{
   'generate-screenshot': []
   upload: [file: UploadFile]
   'delete-result': [index: number]
+  'drop-asset': [asset: CombinedAsset]
 }>()
 
 // 处理生成截图
@@ -86,5 +92,22 @@ const handleUpload = (file: UploadFile) => {
 // 处理删除结果
 const handleDeleteResult = (index: number) => {
   emit('delete-result', index)
+}
+
+// 处理拖拽放下
+const handleDrop = (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (event.dataTransfer) {
+    try {
+      const dragData = JSON.parse(event.dataTransfer.getData('asset'))
+      if (dragData && dragData.asset) {
+        emit('drop-asset', dragData.asset as CombinedAsset)
+      }
+    } catch (error) {
+      console.error('解析拖拽数据失败:', error)
+    }
+  }
 }
 </script>
