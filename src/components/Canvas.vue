@@ -281,7 +281,10 @@ const onDrop = (event: DragEvent) => {
   const top = event.clientY - rect.top - dragData.relativeY
 
   if (asset.type === 'image') {
-    addImageElement(asset, left, top)
+    // 使用拖拽数据中的缩略图尺寸
+    const thumbnailWidth = dragData.thumbnailWidth || 200
+    const thumbnailHeight = dragData.thumbnailHeight || 200
+    addImageElement(asset, left, top, thumbnailWidth, thumbnailHeight)
   } else if (asset.type === 'pose') {
     addHumanElement(asset, left, top)
   }
@@ -481,15 +484,21 @@ const addNumberElement = (left: number, top: number) => {
 }
 
 // 添加图片元素
-const addImageElement = (asset: Asset, left: number, top: number) => {
+const addImageElement = (
+  asset: Asset,
+  left: number,
+  top: number,
+  realWidth: number,
+  realHeight: number,
+) => {
   emit('element-add', {
     type: 'image',
     url: asset.url,
     name: asset.name,
     left,
     top,
-    width: 200,
-    height: 200,
+    width: realWidth,
+    height: realHeight,
   })
 }
 

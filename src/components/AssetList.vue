@@ -171,7 +171,7 @@ const handleTabChange = (tab: 'images' | 'poses') => {
   emit('tab-change', tab)
 }
 
-// 拖拽开始处理
+// 拖拽开始处理（含自定义预览图大小设置）
 const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
   if (event.dataTransfer) {
     // 获取鼠标在缩略图上的相对位置
@@ -180,13 +180,67 @@ const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
     const relativeX = event.clientX - rect.left
     const relativeY = event.clientY - rect.top
 
-    // 将资产信息和相对位置一起存储
+    // 获取图片的真实尺寸和URL
+    let realWidth = rect.width
+    let realHeight = rect.height
+    let imageUrl = ''
+
+    if (asset.type === 'image') {
+      imageUrl = (asset as Asset).url
+    } else if (asset.type === 'pose') {
+      imageUrl = (asset as Pose).thumbnail
+    }
+
+    // 创建图片对象获取真实尺寸
+    const img = new Image()
+    if (imageUrl) {
+      img.src = imageUrl
+      if (img.complete) {
+        realWidth = img.naturalWidth
+        realHeight = img.naturalHeight
+      } else {
+        // 图片未加载完成时，使用默认尺寸
+        img.onload = () => {
+          realWidth = img.naturalWidth
+          realHeight = img.naturalHeight
+        }
+      }
+    }
+
+    // 计算缩略图尺寸：高度固定为200px，宽度按比例计算
+    const thumbnailHeight = 200
+    const thumbnailWidth = Math.round((realWidth / realHeight) * thumbnailHeight)
+
+    // 创建自定义拖拽预览图
+    if (imageUrl) {
+      const tempImg = new Image()
+      tempImg.src = imageUrl
+
+      // 设置预览图尺寸：高度200px，宽度按比例计算
+      tempImg.width = thumbnailWidth
+      tempImg.height = thumbnailHeight
+
+      // 隐藏临时图片
+      tempImg.style.position = 'absolute'
+      tempImg.style.left = '-9999px'
+      document.body.appendChild(tempImg)
+
+      // 设置拖拽预览图
+      event.dataTransfer.setDragImage(tempImg, tempImg.width / 2, tempImg.height / 2)
+
+      // 拖拽结束后移除临时图片
+      setTimeout(() => document.body.removeChild(tempImg), 0)
+    }
+
+    // 将资产信息、相对位置和缩略图尺寸一起存储
     const dragData = {
       asset,
       relativeX,
       relativeY,
-      thumbnailWidth: rect.width,
-      thumbnailHeight: rect.height,
+      thumbnailWidth: thumbnailWidth,
+      thumbnailHeight: thumbnailHeight,
+      realWidth,
+      realHeight,
     }
     event.dataTransfer.setData('asset', JSON.stringify(dragData))
     emit('drag-start', event, asset)
