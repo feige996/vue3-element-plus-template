@@ -431,9 +431,19 @@ const deleteGenerationResult = (index: number) => {
   generationResults.value.splice(index, 1)
 }
 
-// 生成唯一ID
+// 生成唯一ID（兼容处理）
 const generateUUID = () => {
-  return crypto.randomUUID()
+  // 优先使用现代浏览器的原生方法
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+
+  // 兼容性 fallback 实现（UUID v4 格式）
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
 }
 
 // 生成当前日期字符串 (YYYY-MM-DD)
