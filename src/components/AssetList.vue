@@ -174,15 +174,15 @@ const handleTabChange = (tab: 'images' | 'poses') => {
 // 拖拽开始处理（含自定义预览图大小设置）
 const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
   if (event.dataTransfer) {
-    // 获取鼠标在缩略图上的相对位置
+    // 获取鼠标在容器上的相对位置
     const target = event.target as HTMLElement
     const rect = target.getBoundingClientRect()
-    const relativeX = event.clientX - rect.left
-    const relativeY = event.clientY - rect.top
+    const mouseX = event.clientX - rect.left
+    const mouseY = event.clientY - rect.top
 
     // 获取图片的真实尺寸和URL
-    let realWidth = rect.width
-    let realHeight = rect.height
+    let realWidth = 0
+    let realHeight = 0
     let imageUrl = ''
 
     if (asset.type === 'image') {
@@ -211,6 +211,16 @@ const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
     const thumbnailHeight = 200
     const thumbnailWidth = Math.round((realWidth / realHeight) * thumbnailHeight)
 
+    // 计算图片在容器中的实际位置（考虑居中显示）
+    const containerWidth = rect.width
+    const containerHeight = rect.height
+    const imageLeft = (containerWidth - thumbnailWidth) / 2
+    const imageTop = (containerHeight - thumbnailHeight) / 2
+
+    // 基于图片实际位置计算相对位置
+    const relativeX = mouseX - imageLeft
+    const relativeY = mouseY - imageTop
+
     // 创建自定义拖拽预览图
     if (imageUrl) {
       const tempImg = new Image()
@@ -225,8 +235,8 @@ const onDragStart = (event: DragEvent, asset: CombinedAsset) => {
       tempImg.style.left = '-9999px'
       document.body.appendChild(tempImg)
 
-      // 设置拖拽预览图
-      event.dataTransfer.setDragImage(tempImg, tempImg.width / 2, tempImg.height / 2)
+      // 设置拖拽预览图：使用鼠标在预览图上的相对位置
+      event.dataTransfer.setDragImage(tempImg, relativeX, relativeY)
 
       // 拖拽结束后移除临时图片
       setTimeout(() => document.body.removeChild(tempImg), 0)
