@@ -193,7 +193,11 @@ const handleToggleCanvas = () => {
 onMounted(() => {
   document.addEventListener('click', handleGlobalClick)
   document.addEventListener('keydown', handleKeyDown)
-  nextTick(() => initializeDashedElement())
+  nextTick(() => {
+    initializeDashedElement()
+    // 初始化历史记录，将初始状态（包含虚线框）保存到历史记录
+    historyStack.value = [JSON.parse(JSON.stringify(canvasElements.value))]
+  })
 })
 
 // 组件卸载时移除全局事件监听器
@@ -237,7 +241,7 @@ const initializeDashedElement = () => {
     height: size,
     aspectRatio: 1,
     screenshot: undefined,
-    zIndex: 1, // 虚线框固定在最底层
+    zIndex: 1,
   }
 
   canvasElements.value.push(dashedElement)
