@@ -37,7 +37,7 @@
     <h3 class="text-sm font-medium text-gray-700 mb-2">算法处理后的生成结果图片列表</h3>
 
     <!-- 生成结果列表 -->
-    <div class="flex flex-wrap gap-4">
+    <div class="flex gap-4 overflow-x-auto whitespace-nowrap">
       <div
         v-for="(result, index) in generationResults"
         :key="result.id"

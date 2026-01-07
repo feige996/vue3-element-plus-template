@@ -3,10 +3,10 @@
     <div class="flex gap-4 items-center mb-2">
       <h3 class="text-sm font-medium text-gray-700">传递给算法的图片列表</h3>
     </div>
-    <div class="flex flex-wrap gap-4">
+    <div class="flex gap-4 overflow-x-auto whitespace-nowrap">
       <!-- 上传控件 -->
       <el-upload
-        class="w-24 h-24 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
+        class="w-24 h-24 flex-shrink-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
         action="#"
         :auto-upload="false"
         :on-change="handleUpload"
