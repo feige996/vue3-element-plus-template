@@ -40,7 +40,7 @@
     </div>
 
     <!-- 资产列表 -->
-    <div v-show="isExpanded" class="flex flex-wrap gap-4">
+    <div v-show="isExpanded" class="flex flex-wrap gap-4 px-2">
       <!-- 上传控件 -->
       <el-upload
         class="w-24 h-24 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
@@ -146,7 +146,7 @@ const emit = defineEmits<{
 // 资产库标签页配置
 const assetTabs = ref<{ label: string; value: 'images' | 'poses' }[]>([
   { label: '图片资源', value: 'images' },
-  { label: '人物姿势', value: 'poses' },
+  // { label: '人物姿势', value: 'poses' },
 ])
 
 // 当前选中的标签页
