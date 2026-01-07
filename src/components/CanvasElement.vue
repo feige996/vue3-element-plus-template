@@ -104,10 +104,10 @@
       }"
     >
       <line
-        :x1="element.startX || 0"
-        :y1="element.startY || 0"
-        :x2="element.endX || 0"
-        :y2="element.endY || 0"
+        :x1="lineEndPoints.startX"
+        :y1="lineEndPoints.startY"
+        :x2="lineEndPoints.endX"
+        :y2="lineEndPoints.endY"
         :stroke="element.color"
         :stroke-width="element.strokeWidth || 3"
         stroke-linecap="round"
@@ -219,6 +219,19 @@ const elementStyle = computed(() => {
   return baseStyle
 })
 
+// 计算箭头直线的端点，确保箭头头部完全覆盖直线末端
+const lineEndPoints = computed(() => {
+  if (props.element.type === 'arrow') {
+    return getLineEndPoints(props.element)
+  }
+  return {
+    startX: props.element.startX || 0,
+    startY: props.element.startY || 0,
+    endX: props.element.endX || 0,
+    endY: props.element.endY || 0,
+  }
+})
+
 // 处理点击事件
 const handleClick = () => {
   if (props.activeTool) {
@@ -296,6 +309,33 @@ const getArrowHeadPoints = (element: CanvasElementType) => {
   const y2 = endY - headLength * Math.sin(angle + Math.PI / 6)
 
   return `${endX},${endY} ${x1},${y1} ${x2},${y2}`
+}
+
+// 计算直线的终点坐标，确保箭头头部完全覆盖直线末端
+const getLineEndPoints = (element: CanvasElementType) => {
+  const startX = element.startX || 0
+  const startY = element.startY || 0
+  const endX = element.endX || 0
+  const endY = element.endY || 0
+  const strokeWidth = element.strokeWidth || 3
+
+  // 计算直线的角度
+  const angle = Math.atan2(endY - startY, endX - startX)
+
+  // 计算箭头头部的长度
+  const headLength = Math.max(15, strokeWidth * 3)
+
+  // 计算箭头头部的基线位置（箭头头部与直线的连接点）
+  // 从箭头头部尖端向回移动一小段距离，确保直线末端被箭头头部完全覆盖
+  const lineEndX = endX - headLength * 0.1 * Math.cos(angle)
+  const lineEndY = endY - headLength * 0.1 * Math.sin(angle)
+
+  return {
+    startX,
+    startY,
+    endX: lineEndX,
+    endY: lineEndY,
+  }
 }
 </script>
 

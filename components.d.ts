@@ -12,14 +12,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AIGCCanvas: typeof import('./src/components/Canvas.vue')['default']
     AssetList: typeof import('./src/components/AssetList.vue')['default']
     Canvas: typeof import('./src/components/Canvas.vue')['default']
     CanvasElement: typeof import('./src/components/CanvasElement.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
-    ElDialog: typeof import('element-plus/es')['ElDialog']
-    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElOption: typeof import('element-plus/es')['ElOption']
@@ -32,21 +29,17 @@ declare module 'vue' {
     ResultList: typeof import('./src/components/ResultList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    TestDemo: typeof import('./src/components/Toolbar.vue')['default']
     Toolbar: typeof import('./src/components/Toolbar.vue')['default']
   }
 }
 
 // For TSX support
 declare global {
-  const AIGCCanvas: typeof import('./src/components/Canvas.vue')['default']
   const AssetList: typeof import('./src/components/AssetList.vue')['default']
   const Canvas: typeof import('./src/components/Canvas.vue')['default']
   const CanvasElement: typeof import('./src/components/CanvasElement.vue')['default']
   const ElButton: typeof import('element-plus/es')['ElButton']
   const ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
-  const ElDialog: typeof import('element-plus/es')['ElDialog']
-  const ElIcon: typeof import('element-plus/es')['ElIcon']
   const ElImage: typeof import('element-plus/es')['ElImage']
   const ElInput: typeof import('element-plus/es')['ElInput']
   const ElOption: typeof import('element-plus/es')['ElOption']
@@ -59,6 +52,5 @@ declare global {
   const ResultList: typeof import('./src/components/ResultList.vue')['default']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']
-  const TestDemo: typeof import('./src/components/Toolbar.vue')['default']
   const Toolbar: typeof import('./src/components/Toolbar.vue')['default']
 }
