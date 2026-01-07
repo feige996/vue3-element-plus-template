@@ -280,7 +280,8 @@ const onCanvasMouseDown = (event: MouseEvent) => {
       erasedElementIds.value = []
       // 检查鼠标位置是否在某个元素上
       const clickedElement = findElementAtPosition(left, top)
-      if (clickedElement) {
+      // 不允许擦除虚线框
+      if (clickedElement && clickedElement.type !== 'dashed') {
         erasedElementIds.value.push(clickedElement.id)
         emit('element-delete', clickedElement.id)
       }
@@ -375,7 +376,8 @@ const onCanvasMouseMove = (event: MouseEvent) => {
     const y = event.clientY - rect.top
 
     const element = findElementAtPosition(x, y)
-    if (element && !erasedElementIds.value.includes(element.id)) {
+    // 不允许擦除虚线框
+    if (element && element.type !== 'dashed' && !erasedElementIds.value.includes(element.id)) {
       erasedElementIds.value.push(element.id)
       emit('element-delete', element.id)
     }
@@ -843,6 +845,9 @@ const findElementAtPosition = (x: number, y: number): CanvasElementType | null =
   for (let i = props.canvasElements.length - 1; i >= 0; i--) {
     const element = props.canvasElements[i]
     if (!element) continue
+
+    // 跳过虚线框，不允许删除虚线框
+    if (element.type === 'dashed') continue
 
     const elementRight = element.left + (element.width || 0)
     const elementBottom = element.top + (element.height || 0)

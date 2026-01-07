@@ -396,6 +396,10 @@ const deleteElement = (id?: string) => {
 
   const elementToDelete = canvasElements.value.find((el) => el.id === elementId)
   if (elementToDelete) {
+    // 不允许删除虚线框
+    if (elementToDelete.type === 'dashed') {
+      return
+    }
     if (mainDashedElement.value?.id === elementToDelete.id) {
       mainDashedElement.value = null
     }
