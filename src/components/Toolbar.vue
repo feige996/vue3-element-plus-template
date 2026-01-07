@@ -24,6 +24,44 @@
     >
       数字标
     </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'brush' }"
+      @click="handleToolChange('brush')"
+    >
+      画笔
+    </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'eraser' }"
+      @click="handleToolChange('eraser')"
+    >
+      擦除
+    </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'arrow' }"
+      @click="handleToolChange('arrow')"
+    >
+      箭头
+    </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'circle' }"
+      @click="handleToolChange('circle')"
+    >
+      圆形框
+    </el-button>
+    <el-button
+      type="primary"
+      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'line' }"
+      @click="handleToolChange('line')"
+    >
+      直线
+    </el-button>
+    <div class="w-px h-6 bg-gray-300 mx-2"></div>
+    <el-button type="info" @click="handleUndo"> 撤销 </el-button>
+    <el-button type="info" @click="handleRedo"> 重做 </el-button>
     <div class="w-px h-6 bg-gray-300 mx-2"></div>
     <!-- <el-button :type="editMode ? 'success' : 'info'" @click="handleEditModeChange">
       {{ editMode ? '编辑' : '浏览' }}
@@ -50,7 +88,7 @@ import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 
 // Props 定义
 interface Props {
-  activeTool?: 'text' | 'rect' | 'number' | null
+  activeTool?: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
   editMode?: boolean
   isScreenshotLoading?: boolean
 }
@@ -61,11 +99,15 @@ const props = withDefaults(defineProps<Props>(), {
 })
 // Emits 定义
 const emit = defineEmits<{
-  'tool-change': [tool: 'text' | 'rect' | 'number' | null]
+  'tool-change': [
+    tool: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null,
+  ]
   'edit-mode-change': [editMode: boolean]
   'clear-canvas': []
   'toggle-canvas': []
   'generate-screenshot': []
+  undo: []
+  redo: []
 }>()
 
 // 工具栏引用
@@ -81,7 +123,9 @@ const handleToggleCanvas = () => {
 }
 
 // 处理工具切换
-const handleToolChange = (tool: 'text' | 'rect' | 'number') => {
+const handleToolChange = (
+  tool: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line',
+) => {
   const newTool = props.activeTool === tool ? null : tool
   emit('tool-change', newTool)
 }
@@ -99,6 +143,16 @@ const handleClearCanvas = () => {
 // 处理生成截图
 const handleGenerateScreenshot = () => {
   emit('generate-screenshot')
+}
+
+// 处理撤销
+const handleUndo = () => {
+  emit('undo')
+}
+
+// 处理重做
+const handleRedo = () => {
+  emit('redo')
 }
 
 // 暴露工具栏引用，供父组件使用

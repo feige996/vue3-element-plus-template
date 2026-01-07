@@ -273,29 +273,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-
-interface CanvasElement {
-  id: string
-  type: 'image' | 'text' | 'rect' | 'dashed' | 'number' | 'human'
-  left: number
-  top: number
-  width?: number
-  height?: number
-  size?: number
-  url?: string
-  name?: string
-  content?: string
-  color?: string
-  backgroundColor?: string
-  number?: number
-  fontSize?: number
-  aspectRatio?: number
-  screenshot?: string
-  rotation?: number
-  figureType?: string
-  pose?: string
-  zIndex?: number
-}
+import type { CanvasElement } from '../typing'
 
 interface Props {
   selectedElement: CanvasElement | null

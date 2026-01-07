@@ -67,6 +67,68 @@
       @jointMousedown="handleJointMousedown"
     />
 
+    <!-- 画笔元素 -->
+    <svg
+      v-else-if="element.type === 'brush'"
+      class="w-full h-full"
+      :style="{ left: '0', top: '0', position: 'absolute' }"
+    >
+      <polyline
+        :points="element.points?.map((p) => `${p.x},${p.y}`).join(' ') || ''"
+        fill="none"
+        :stroke="element.color"
+        :stroke-width="element.strokeWidth || 3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+
+    <!-- 箭头元素 -->
+    <svg
+      v-else-if="element.type === 'arrow'"
+      class="w-full h-full"
+      :style="{ left: '0', top: '0', position: 'absolute' }"
+    >
+      <line
+        :x1="element.startX || 0"
+        :y1="element.startY || 0"
+        :x2="element.endX || 0"
+        :y2="element.endY || 0"
+        :stroke="element.color"
+        :stroke-width="element.strokeWidth || 3"
+        stroke-linecap="round"
+      />
+      <polygon :points="getArrowHeadPoints(element)" :fill="element.color" />
+    </svg>
+
+    <!-- 圆形框元素 -->
+    <div
+      v-else-if="element.type === 'circle'"
+      class="w-full h-full border-2 border-solid"
+      :style="{
+        borderColor: element.color,
+        borderRadius: '50%',
+        backgroundColor: 'transparent',
+      }"
+    ></div>
+
+    <!-- 直线元素 -->
+    <svg
+      v-else-if="element.type === 'line'"
+      class="w-full h-full"
+      :style="{ left: '0', top: '0', position: 'absolute' }"
+    >
+      <line
+        :x1="element.startX || 0"
+        :y1="element.startY || 0"
+        :x2="element.endX || 0"
+        :y2="element.endY || 0"
+        :stroke="element.color"
+        :stroke-width="element.strokeWidth || 3"
+        stroke-linecap="round"
+      />
+    </svg>
+
     <!-- 缩放控制点 -->
     <div
       v-if="isSelected && editMode && element.type !== 'number'"
@@ -80,37 +142,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import HumanFigure from './HumanFigure.vue'
-
-// 画布元素数据类型定义
-interface CanvasElement {
-  id: string
-  type: 'image' | 'text' | 'rect' | 'dashed' | 'number' | 'human'
-  left: number
-  top: number
-  width?: number
-  height?: number
-  size?: number
-  url?: string
-  name?: string
-  content?: string
-  color?: string
-  backgroundColor?: string
-  number?: number
-  fontSize?: number
-  aspectRatio?: number
-  screenshot?: string
-  rotation?: number
-  figureType?: string
-  pose?: string
-  zIndex?: number
-}
+import type { CanvasElement as CanvasElementType } from '../typing'
 
 // Props 定义
 interface Props {
-  element: CanvasElement
+  element: CanvasElementType
   isSelected?: boolean
   editMode?: boolean
-  activeTool?: 'text' | 'rect' | 'number' | null
+  activeTool?: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -122,9 +161,9 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits 定义
 const emit = defineEmits<{
   select: [id: string]
-  mousedown: [event: MouseEvent, element: CanvasElement]
-  'resize-start': [event: MouseEvent, element: CanvasElement, direction: 'se']
-  'joint-mousedown': [event: MouseEvent, element: CanvasElement]
+  mousedown: [event: MouseEvent, element: CanvasElementType]
+  'resize-start': [event: MouseEvent, element: CanvasElementType, direction: 'se']
+  'joint-mousedown': [event: MouseEvent, element: CanvasElementType]
   'text-input': [event: Event, id: string]
   'composition-start': []
   'composition-end': [event: CompositionEvent, id: string]
@@ -215,6 +254,23 @@ const handleCompositionStart = () => {
 // 处理中文输入结束
 const handleCompositionEnd = (event: CompositionEvent) => {
   emit('composition-end', event, props.element.id)
+}
+
+// 计算箭头头部坐标
+const getArrowHeadPoints = (element: CanvasElementType) => {
+  const startX = element.startX || 0
+  const startY = element.startY || 0
+  const endX = element.endX || 0
+  const endY = element.endY || 0
+  const headLength = 15
+  const angle = Math.atan2(endY - startY, endX - startX)
+
+  const x1 = endX - headLength * Math.cos(angle - Math.PI / 6)
+  const y1 = endY - headLength * Math.sin(angle - Math.PI / 6)
+  const x2 = endX - headLength * Math.cos(angle + Math.PI / 6)
+  const y2 = endY - headLength * Math.sin(angle + Math.PI / 6)
+
+  return `${endX},${endY} ${x1},${y1} ${x2},${y2}`
 }
 </script>
 

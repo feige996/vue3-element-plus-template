@@ -22,6 +22,8 @@
         @clear-canvas="clearCanvas"
         @toggle-canvas="handleToggleCanvas"
         @generate-screenshot="generateScreenshot"
+        @undo="undo"
+        @redo="redo"
       />
 
       <!-- 画布和属性面板 -->
@@ -94,40 +96,25 @@ import PropertyPanel from './components/PropertyPanel.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
 import { generateImage, getTaskStatus, TaskStatusE } from './utils/aigc'
-import type { CombinedAsset } from './typing'
-
-// 画布元素数据类型定义
-interface CanvasElement {
-  id: string
-  type: 'image' | 'text' | 'rect' | 'dashed' | 'number' | 'human'
-  left: number
-  top: number
-  width?: number
-  height?: number
-  size?: number
-  url?: string
-  name?: string
-  content?: string
-  color?: string
-  backgroundColor?: string
-  number?: number
-  fontSize?: number
-  aspectRatio?: number
-  screenshot?: string
-  rotation?: number
-  figureType?: string
-  pose?: string
-  zIndex?: number
-}
+import type { CombinedAsset, CanvasElement } from './typing'
 
 // 画布元素列表
 const canvasElements = ref<CanvasElement[]>([])
+
+// 历史记录栈
+const historyStack = ref<CanvasElement[][]>([[]])
+const historyIndex = ref(0)
+
+// 最大历史记录数量
+const MAX_HISTORY = 50
 
 // 当前选中的元素ID
 const selectedElementId = ref<string | null>(null)
 
 // 活跃工具
-const activeTool = ref<'text' | 'rect' | 'number' | null>(null)
+const activeTool = ref<
+  'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
+>(null)
 
 // 编辑模式
 const editMode = ref(true)
@@ -280,6 +267,45 @@ const handleGlobalClick = (event: MouseEvent) => {
 const currentMaxZIndex = ref(100)
 
 // 添加画布元素
+// 保存历史记录
+const saveHistory = () => {
+  const currentElements = JSON.parse(JSON.stringify(canvasElements.value))
+
+  // 如果当前不在历史记录末尾，删除后面的记录
+  if (historyIndex.value < historyStack.value.length - 1) {
+    historyStack.value = historyStack.value.slice(0, historyIndex.value + 1)
+  }
+
+  // 添加新的历史记录
+  historyStack.value.push(currentElements)
+
+  // 限制历史记录数量
+  if (historyStack.value.length > MAX_HISTORY) {
+    historyStack.value.shift()
+  } else {
+    historyIndex.value++
+  }
+}
+
+// 撤销
+const undo = () => {
+  if (historyIndex.value > 0) {
+    historyIndex.value--
+    canvasElements.value = JSON.parse(JSON.stringify(historyStack.value[historyIndex.value]))
+    selectedElementId.value = null
+  }
+}
+
+// 重做
+const redo = () => {
+  if (historyIndex.value < historyStack.value.length - 1) {
+    historyIndex.value++
+    canvasElements.value = JSON.parse(JSON.stringify(historyStack.value[historyIndex.value]))
+    selectedElementId.value = null
+  }
+}
+
+// 添加画布元素
 const addCanvasElement = (element: Partial<CanvasElement>) => {
   const elementZIndex = element.zIndex || currentMaxZIndex.value
   if (elementZIndex >= currentMaxZIndex.value) {
@@ -303,6 +329,9 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
   }
   canvasElements.value.push(newElement)
   selectedElementId.value = newElement.id
+
+  // 保存历史记录
+  saveHistory()
 
   if (newElement.type === 'text' || newElement.type === 'rect' || newElement.type === 'number') {
     activeTool.value = null
@@ -333,6 +362,8 @@ const updateElement = (element: CanvasElement) => {
   const index = canvasElements.value.findIndex((el) => el.id === element.id)
   if (index !== -1) {
     canvasElements.value[index] = element
+    // 保存历史记录
+    saveHistory()
   }
 }
 
@@ -343,25 +374,33 @@ const updateDashedHeight = () => {
   const width = selectedElement.value.width || 100
   const aspectRatio = selectedElement.value.aspectRatio || 1
   selectedElement.value.height = width / aspectRatio
+  // 保存历史记录
+  saveHistory()
 }
 
 // 删除元素
-const deleteElement = () => {
-  if (!selectedElementId.value) return
+const deleteElement = (id?: string) => {
+  const elementId = id || selectedElementId.value
+  if (!elementId) return
 
-  const elementToDelete = canvasElements.value.find((el) => el.id === selectedElementId.value)
+  const elementToDelete = canvasElements.value.find((el) => el.id === elementId)
   if (elementToDelete) {
     if (mainDashedElement.value?.id === elementToDelete.id) {
       mainDashedElement.value = null
     }
   }
 
-  const index = canvasElements.value.findIndex((el) => el.id === selectedElementId.value)
+  const index = canvasElements.value.findIndex((el) => el.id === elementId)
   if (index !== -1) {
     canvasElements.value.splice(index, 1)
+    // 保存历史记录
+    saveHistory()
   }
 
-  selectedElementId.value = null
+  // 如果删除的是当前选中的元素，清空选中状态
+  if (elementId === selectedElementId.value) {
+    selectedElementId.value = null
+  }
 }
 
 // 清空画布
@@ -370,6 +409,8 @@ const clearCanvas = () => {
   selectedElementId.value = null
   mainDashedElement.value = null
   initializeDashedElement()
+  // 保存历史记录
+  saveHistory()
 }
 
 // 更新文本内容
