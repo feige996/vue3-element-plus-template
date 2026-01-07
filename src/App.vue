@@ -1,14 +1,7 @@
 <template>
   <div class="flex flex-col bg-gray-100">
     <!-- 上部：资产列表 -->
-    <AssetList
-      :image-assets="imageAssets"
-      :pose-assets="poseAssets"
-      :current-tab="currentAssetTab"
-      @tab-change="(tab) => (currentAssetTab = tab)"
-      @upload="handleAssetUpload"
-      @delete-asset="handleDeleteAsset"
-    />
+    <AssetList :current-tab="currentAssetTab" @tab-change="(tab) => (currentAssetTab = tab)" />
 
     <!-- 中部：工具栏 + 画布 + 属性面板 -->
     <div class="flex flex-col border-b border-gray-300" style="height: 600px">
@@ -141,86 +134,6 @@ interface Pose {
 // 合并资产类型
 type CombinedAsset = Asset | Pose
 
-// 人物姿势库
-const poseAssets = ref<Pose[]>([
-  {
-    id: 1,
-    name: '站立姿势',
-    type: 'pose',
-    poseId: 'standing',
-    thumbnail: 'https://picsum.photos/800/800?random=21',
-  },
-  {
-    id: 2,
-    name: '挥手姿势',
-    type: 'pose',
-    poseId: 'waving',
-    thumbnail: 'https://picsum.photos/1920/1080?random=22',
-  },
-  {
-    id: 3,
-    name: '坐姿',
-    type: 'pose',
-    poseId: 'sitting',
-    thumbnail: 'https://picsum.photos/1080/1920?random=23',
-  },
-  {
-    id: 4,
-    name: '思考姿势',
-    type: 'pose',
-    poseId: 'thinking',
-    thumbnail: 'https://picsum.photos/1600/1200?random=24',
-  },
-  {
-    id: 5,
-    name: '跑步姿势',
-    type: 'pose',
-    poseId: 'running',
-    thumbnail: 'https://picsum.photos/1200/1600?random=25',
-  },
-  {
-    id: 6,
-    name: '跳跃姿势',
-    type: 'pose',
-    poseId: 'jumping',
-    thumbnail: 'https://picsum.photos/300/300?random=26',
-  },
-])
-
-// 图片资产
-const imageAssets = ref<Asset[]>([
-  {
-    id: 1,
-    name: '示例图片1',
-    type: 'image',
-    url: 'https://picsum.photos/800/800?random=1',
-  },
-  {
-    id: 2,
-    name: '示例图片2',
-    type: 'image',
-    url: 'https://picsum.photos/1920/1080?random=2',
-  },
-  {
-    id: 3,
-    name: '示例图片3',
-    type: 'image',
-    url: 'https://picsum.photos/1080/1920?random=3',
-  },
-  {
-    id: 4,
-    name: '示例图片4',
-    type: 'image',
-    url: 'https://picsum.photos/1600/1200?random=4',
-  },
-  {
-    id: 5,
-    name: '示例图片5',
-    type: 'image',
-    url: 'https://picsum.photos/1200/1600?random=5',
-  },
-])
-
 // 画布元素列表
 const canvasElements = ref<CanvasElement[]>([])
 
@@ -296,15 +209,6 @@ const assetTabs = ref<{ label: string; value: 'images' | 'poses' }[]>([
 
 // 当前选中的标签页
 const currentAssetTab = ref<'images' | 'poses'>('images')
-
-// 根据当前标签页过滤资产
-const filteredAssets = computed(() => {
-  if (currentAssetTab.value === 'images') {
-    return imageAssets.value
-  } else {
-    return poseAssets.value
-  }
-})
 
 // 组件挂载时添加全局事件监听器
 onMounted(() => {
@@ -508,46 +412,6 @@ const handleUpload = async (file: UploadFile) => {
 }
 
 // 资产上传处理
-const handleAssetUpload = async (file: UploadFile) => {
-  if (file?.raw && file.raw instanceof File) {
-    try {
-      const uploadInfo = await uploadFile({
-        filename: file.raw.name,
-        file: file.raw,
-      })
-
-      if (currentAssetTab.value === 'images') {
-        const newAsset: Asset = {
-          id: Date.now(),
-          name: file.raw.name,
-          type: 'image',
-          url: uploadInfo.previewUrl,
-        }
-        imageAssets.value.push(newAsset)
-      } else {
-        const newPose: Pose = {
-          id: Date.now(),
-          name: file.raw.name,
-          type: 'pose',
-          poseId: `custom-${Date.now()}`,
-          thumbnail: uploadInfo.previewUrl,
-        }
-        poseAssets.value.push(newPose)
-      }
-    } catch (error) {
-      console.error('资产上传失败:', error)
-    }
-  }
-}
-
-// 删除资产处理
-const handleDeleteAsset = (index: number) => {
-  if (currentAssetTab.value === 'images') {
-    imageAssets.value.splice(index, 1)
-  } else {
-    poseAssets.value.splice(index, 1)
-  }
-}
 
 // 生成截图
 const generateScreenshot = () => {
