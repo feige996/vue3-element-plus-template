@@ -25,9 +25,9 @@
       数字标
     </el-button>
     <div class="w-px h-6 bg-gray-300 mx-2"></div>
-    <el-button :type="editMode ? 'success' : 'info'" @click="handleEditModeChange">
+    <!-- <el-button :type="editMode ? 'success' : 'info'" @click="handleEditModeChange">
       {{ editMode ? '编辑' : '浏览' }}
-    </el-button>
+    </el-button> -->
     <el-button type="danger" @click="handleClearCanvas"> 清空画布 </el-button>
     <el-button type="success" @click="handleGenerateScreenshot" :loading="isScreenshotLoading">
       生成截图
