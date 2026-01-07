@@ -282,8 +282,12 @@ const getArrowHeadPoints = (element: CanvasElementType) => {
   const startY = element.startY || 0
   const endX = element.endX || 0
   const endY = element.endY || 0
-  // 箭头头部大小与线宽成比例，确保箭头头部随线宽缩放
-  const headLength = (element.strokeWidth || 3) * 2
+  // 箭头头部大小与线宽成比例，确保箭头头部随线宽缩放且看起来更像箭头
+  // 使用更大的缩放因子，使箭头头部更明显
+  const baseSize = 15 // 基础大小，确保细线时也有明显的箭头
+  const strokeWidth = element.strokeWidth || 3
+  // 结合基础大小和线宽，确保箭头头部比例协调
+  const headLength = Math.max(baseSize, strokeWidth * 3)
   const angle = Math.atan2(endY - startY, endX - startX)
 
   const x1 = endX - headLength * Math.cos(angle - Math.PI / 6)
