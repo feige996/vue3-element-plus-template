@@ -335,7 +335,16 @@ const addCanvasElement = (element: Partial<CanvasElement>) => {
   // 保存历史记录
   saveHistory()
 
-  if (newElement.type === 'text' || newElement.type === 'rect' || newElement.type === 'number') {
+  // 添加元素后，如果当前工具是画笔、箭头、圆形、直线，则关闭工具
+  if (
+    newElement.type === 'text' ||
+    newElement.type === 'rect' ||
+    newElement.type === 'number' ||
+    newElement.type === 'brush' ||
+    newElement.type === 'arrow' ||
+    newElement.type === 'circle' ||
+    newElement.type === 'line'
+  ) {
     activeTool.value = null
   }
 
