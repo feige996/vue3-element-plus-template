@@ -27,8 +27,12 @@
     <!-- 矩形框元素 -->
     <div
       v-else-if="element.type === 'rect'"
-      class="w-full h-full border-2 border-solid"
-      :style="{ borderColor: element.color, backgroundColor: 'transparent' }"
+      class="w-full h-full border-solid"
+      :style="{
+        borderColor: element.color,
+        borderWidth: `${element.strokeWidth || 2}px`,
+        backgroundColor: 'transparent',
+      }"
     ></div>
     <!-- 虚线框元素 -->
     <div
@@ -104,9 +108,10 @@
     <!-- 圆形框元素 -->
     <div
       v-else-if="element.type === 'circle'"
-      class="w-full h-full border-2 border-solid"
+      class="w-full h-full border-solid"
       :style="{
         borderColor: element.color,
+        borderWidth: `${element.strokeWidth || 2}px`,
         borderRadius: '50%',
         backgroundColor: 'transparent',
       }"

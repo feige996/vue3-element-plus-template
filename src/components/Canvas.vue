@@ -671,6 +671,7 @@ const addRectElement = (rect: { left: number; top: number; width: number; height
     width: rect.width,
     height: rect.height,
     color: props.colorList[props.currentColorIndex],
+    strokeWidth: 2,
   })
 }
 
@@ -773,6 +774,7 @@ const addBrushElement = (points: { x: number; y: number }[]) => {
     height: height || 1,
     points: points.map((p) => ({ x: p.x - minX, y: p.y - minY })),
     color: props.colorList[props.currentColorIndex],
+    strokeWidth: 3,
   })
 }
 
@@ -794,6 +796,7 @@ const addArrowElement = (start: { x: number; y: number }, end: { x: number; y: n
     endX: end.x - minX,
     endY: end.y - minY,
     color: props.colorList[props.currentColorIndex],
+    strokeWidth: 3,
   })
 }
 
@@ -808,6 +811,7 @@ const addCircleElement = (center: { x: number; y: number }, radius: number) => {
     radiusX: radius,
     radiusY: radius,
     color: props.colorList[props.currentColorIndex],
+    strokeWidth: 2,
   })
 }
 
@@ -829,6 +833,7 @@ const addLineElement = (start: { x: number; y: number }, end: { x: number; y: nu
     endX: end.x - minX,
     endY: end.y - minY,
     color: props.colorList[props.currentColorIndex],
+    strokeWidth: 3,
   })
 }
 

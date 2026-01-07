@@ -18,6 +18,29 @@
               </option>
             </select>
           </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">线框粗细</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="range"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                step="1"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                @input="emitUpdate"
+              />
+              <input
+                type="number"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                class="w-16 p-1 border border-gray-300 rounded"
+                @input="emitUpdate"
+              />
+              <span class="text-sm text-gray-500">px</span>
+            </div>
+          </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">宽度</label>
@@ -36,6 +59,158 @@
                 class="w-full p-1 border border-gray-300 rounded"
                 @input="emitUpdate"
               />
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="localElement.type === 'brush'">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
+            <select
+              v-model="localElement.color"
+              class="w-full p-1 border border-gray-300 rounded"
+              @change="emitUpdate"
+            >
+              <option v-for="color in colorList" :key="color" :value="color">
+                {{ color }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">线框粗细</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="range"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                step="1"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                @input="emitUpdate"
+              />
+              <input
+                type="number"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                class="w-16 p-1 border border-gray-300 rounded"
+                @input="emitUpdate"
+              />
+              <span class="text-sm text-gray-500">px</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="localElement.type === 'arrow'">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
+            <select
+              v-model="localElement.color"
+              class="w-full p-1 border border-gray-300 rounded"
+              @change="emitUpdate"
+            >
+              <option v-for="color in colorList" :key="color" :value="color">
+                {{ color }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">线框粗细</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="range"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                step="1"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                @input="emitUpdate"
+              />
+              <input
+                type="number"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                class="w-16 p-1 border border-gray-300 rounded"
+                @input="emitUpdate"
+              />
+              <span class="text-sm text-gray-500">px</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="localElement.type === 'circle'">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
+            <select
+              v-model="localElement.color"
+              class="w-full p-1 border border-gray-300 rounded"
+              @change="emitUpdate"
+            >
+              <option v-for="color in colorList" :key="color" :value="color">
+                {{ color }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">线框粗细</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="range"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                step="1"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                @input="emitUpdate"
+              />
+              <input
+                type="number"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                class="w-16 p-1 border border-gray-300 rounded"
+                @input="emitUpdate"
+              />
+              <span class="text-sm text-gray-500">px</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="localElement.type === 'line'">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
+            <select
+              v-model="localElement.color"
+              class="w-full p-1 border border-gray-300 rounded"
+              @change="emitUpdate"
+            >
+              <option v-for="color in colorList" :key="color" :value="color">
+                {{ color }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">线框粗细</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="range"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                step="1"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                @input="emitUpdate"
+              />
+              <input
+                type="number"
+                v-model.number="localElement.strokeWidth"
+                min="1"
+                max="20"
+                class="w-16 p-1 border border-gray-300 rounded"
+                @input="emitUpdate"
+              />
+              <span class="text-sm text-gray-500">px</span>
             </div>
           </div>
         </div>
