@@ -16,10 +16,12 @@
         :color-list="colorList"
         :current-color-index="currentColorIndex"
         :current-number="currentNumber"
+        :is-screenshot-loading="isScreenshotLoading"
         @tool-change="(tool) => (activeTool = tool)"
         @toggle-edit-mode="() => (editMode = !editMode)"
         @clear-canvas="clearCanvas"
         @toggle-canvas="handleToggleCanvas"
+        @generate-screenshot="generateScreenshot"
       />
 
       <!-- 画布和属性面板 -->
@@ -64,8 +66,6 @@
       <!-- 结果列表 -->
       <ResultList
         :result-list="resultList"
-        :is-screenshot-loading="isScreenshotLoading"
-        @generate-screenshot="generateScreenshot"
         @upload="handleUpload"
         @delete-result="deleteResult"
         @drop-asset="handleDropAsset"

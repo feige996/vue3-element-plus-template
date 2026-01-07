@@ -29,6 +29,9 @@
       {{ editMode ? '编辑' : '浏览' }}
     </el-button>
     <el-button type="danger" @click="handleClearCanvas"> 清空画布 </el-button>
+    <el-button type="success" @click="handleGenerateScreenshot" :loading="isScreenshotLoading">
+      生成截图
+    </el-button>
     <el-button
       :icon="isCanvasExpanded ? ArrowUp : ArrowDown"
       size="small"
@@ -49,19 +52,20 @@ import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 interface Props {
   activeTool?: 'text' | 'rect' | 'number' | null
   editMode?: boolean
+  isScreenshotLoading?: boolean
 }
-
 const props = withDefaults(defineProps<Props>(), {
   activeTool: null,
   editMode: true,
+  isScreenshotLoading: false,
 })
-
 // Emits 定义
 const emit = defineEmits<{
   'tool-change': [tool: 'text' | 'rect' | 'number' | null]
   'edit-mode-change': [editMode: boolean]
   'clear-canvas': []
   'toggle-canvas': []
+  'generate-screenshot': []
 }>()
 
 // 工具栏引用
@@ -90,6 +94,11 @@ const handleEditModeChange = () => {
 // 处理清空画布
 const handleClearCanvas = () => {
   emit('clear-canvas')
+}
+
+// 处理生成截图
+const handleGenerateScreenshot = () => {
+  emit('generate-screenshot')
 }
 
 // 暴露工具栏引用，供父组件使用

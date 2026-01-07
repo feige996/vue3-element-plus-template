@@ -2,14 +2,6 @@
   <div class="bg-white border-t border-gray-200 p-4 overflow-y-auto">
     <div class="flex gap-4 items-center mb-2">
       <h3 class="text-sm font-medium text-gray-700">传递给算法的图片列表</h3>
-      <el-button
-        type="success"
-        size="small"
-        @click="handleGenerateScreenshot"
-        :loading="isScreenshotLoading"
-      >
-        生成截图
-      </el-button>
     </div>
     <div class="flex flex-wrap gap-4">
       <!-- 上传控件 -->
@@ -66,25 +58,16 @@ import type { CombinedAsset } from '../typing'
 // Props 定义
 interface Props {
   resultList: string[]
-  isScreenshotLoading?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  isScreenshotLoading: false,
-})
+const props = defineProps<Props>()
 
 // Emits 定义
 const emit = defineEmits<{
-  'generate-screenshot': []
   upload: [file: UploadFile]
   'delete-result': [index: number]
   'drop-asset': [asset: CombinedAsset]
 }>()
-
-// 处理生成截图
-const handleGenerateScreenshot = () => {
-  emit('generate-screenshot')
-}
 
 // 处理上传
 const handleUpload = (file: UploadFile) => {
