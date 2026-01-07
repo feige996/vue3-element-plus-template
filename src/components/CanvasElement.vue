@@ -75,7 +75,12 @@
     <svg
       v-else-if="element.type === 'brush'"
       class="w-full h-full"
-      :style="{ left: '0', top: '0', position: 'absolute' }"
+      :style="{
+        left: '0',
+        top: '0',
+        position: 'absolute',
+        overflow: 'visible',
+      }"
     >
       <polyline
         :points="element.points?.map((p) => `${p.x},${p.y}`).join(' ') || ''"
@@ -91,7 +96,12 @@
     <svg
       v-else-if="element.type === 'arrow'"
       class="w-full h-full"
-      :style="{ left: '0', top: '0', position: 'absolute' }"
+      :style="{
+        left: '0',
+        top: '0',
+        position: 'absolute',
+        overflow: 'visible',
+      }"
     >
       <line
         :x1="element.startX || 0"
@@ -121,7 +131,12 @@
     <svg
       v-else-if="element.type === 'line'"
       class="w-full h-full"
-      :style="{ left: '0', top: '0', position: 'absolute' }"
+      :style="{
+        left: '0',
+        top: '0',
+        position: 'absolute',
+        overflow: 'visible',
+      }"
     >
       <line
         :x1="element.startX || 0"
@@ -267,7 +282,8 @@ const getArrowHeadPoints = (element: CanvasElementType) => {
   const startY = element.startY || 0
   const endX = element.endX || 0
   const endY = element.endY || 0
-  const headLength = 15
+  // 箭头头部大小与线宽成比例，确保箭头头部随线宽缩放
+  const headLength = (element.strokeWidth || 3) * 2
   const angle = Math.atan2(endY - startY, endX - startX)
 
   const x1 = endX - headLength * Math.cos(angle - Math.PI / 6)
