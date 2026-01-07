@@ -40,10 +40,10 @@
     </div>
 
     <!-- 资产列表 -->
-    <div v-show="isExpanded" class="flex flex-wrap gap-4 px-2">
+    <div v-show="isExpanded" class="flex gap-4 px-2 overflow-x-auto whitespace-nowrap">
       <!-- 上传控件 -->
       <el-upload
-        class="w-24 h-24 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
+        class="w-24 h-24 flex-shrink-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center"
         action="#"
         :auto-upload="false"
         :on-change="handleUpload"
