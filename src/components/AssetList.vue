@@ -20,14 +20,23 @@
         </div>
       </div>
 
-      <!-- 展开收起按钮 -->
-      <el-button
-        :icon="isExpanded ? ArrowUp : ArrowDown"
-        size="small"
-        @click="isExpanded = !isExpanded"
-      >
-        {{ isExpanded ? '收起' : '展开' }}
-      </el-button>
+      <!-- 展开收起按钮和显示删除按钮 -->
+      <div class="flex gap-2">
+        <el-button
+          :icon="isExpanded ? ArrowUp : ArrowDown"
+          size="small"
+          @click="isExpanded = !isExpanded"
+        >
+          {{ isExpanded ? '收起' : '展开' }}
+        </el-button>
+        <el-button
+          :icon="showDeleteButtons ? Hide : View"
+          size="small"
+          @click="showDeleteButtons = !showDeleteButtons"
+        >
+          {{ showDeleteButtons ? '隐藏删除' : '显示删除' }}
+        </el-button>
+      </div>
     </div>
 
     <!-- 资产列表 -->
@@ -64,12 +73,13 @@
             class="w-24 h-24 border border-gray-200 rounded bg-gray-50"
             :fit="asset.type === 'image' ? 'contain' : 'cover'"
           ></el-image>
-          <!-- <div
+          <div
+            v-if="showDeleteButtons"
             class="absolute top-0 right-0 -mt-1.5 -mr-1.5 z-10 cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
             @click.stop="handleDeleteAsset(index)"
           >
             <CircleClose class="w-4 h-4" />
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
@@ -78,11 +88,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ArrowUp, ArrowDown, CircleClose } from '@element-plus/icons-vue'
+import { ArrowUp, ArrowDown, CircleClose, View, Hide } from '@element-plus/icons-vue'
 import type { UploadFile } from 'element-plus'
 
 // 展开收起状态
 const isExpanded = ref(true)
+
+// 显示删除按钮状态
+const showDeleteButtons = ref(false)
 
 // 资产数据类型定义
 interface Asset {
