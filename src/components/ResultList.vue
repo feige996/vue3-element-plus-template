@@ -33,7 +33,9 @@
       <div
         v-for="(result, index) in resultList"
         :key="index"
-        class="flex flex-col items-center relative"
+        class="flex flex-col items-center relative cursor-move"
+        draggable="true"
+        @dragstart="onDragStart($event, result)"
       >
         <div class="relative">
           <el-image
@@ -108,6 +110,17 @@ const handleDrop = (event: DragEvent) => {
     } catch (error) {
       console.error('解析拖拽数据失败:', error)
     }
+  }
+}
+
+// 处理拖拽开始
+const onDragStart = (event: DragEvent, imageUrl: string) => {
+  if (event.dataTransfer) {
+    // 存储图片URL到拖拽数据
+    const dragData = {
+      url: imageUrl,
+    }
+    event.dataTransfer.setData('image', JSON.stringify(dragData))
   }
 }
 </script>

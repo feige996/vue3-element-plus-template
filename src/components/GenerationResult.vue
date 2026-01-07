@@ -34,7 +34,7 @@
         AI生成
       </el-button>
     </div>
-    <h3 class="text-sm font-medium text-gray-700 mb-2">生成结果图片列表</h3>
+    <h3 class="text-sm font-medium text-gray-700 mb-2">算法处理后的生成结果图片列表</h3>
 
     <!-- 生成结果列表 -->
     <div class="flex flex-wrap gap-4">
@@ -95,7 +95,9 @@
           <!-- 图片项 -->
           <div
             v-else-if="result.type === 'image'"
-            class="w-24 h-24 border border-gray-200 rounded bg-gray-50 overflow-hidden"
+            class="w-24 h-24 border border-gray-200 rounded bg-gray-50 overflow-hidden cursor-move"
+            draggable="true"
+            @dragstart="onDragStart($event, result.url)"
           >
             <el-image
               :src="result.url"
@@ -175,5 +177,16 @@ const handleGenerateAIGCImage = () => {
 // 处理删除生成结果
 const handleDeleteGenerationResult = (index: number) => {
   emit('delete-generation-result', index)
+}
+
+// 处理拖拽开始
+const onDragStart = (event: DragEvent, imageUrl: string) => {
+  if (event.dataTransfer) {
+    // 存储图片URL到拖拽数据
+    const dragData = {
+      url: imageUrl,
+    }
+    event.dataTransfer.setData('image', JSON.stringify(dragData))
+  }
 }
 </script>

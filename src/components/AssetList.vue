@@ -50,6 +50,10 @@
         :draggable="true"
         :show-file-list="false"
         accept="image/*"
+        @drop="handleDrop"
+        @dragover.prevent
+        @dragenter.prevent
+        @dragleave.prevent
       >
         <span class="text-xs text-gray-400">{{
           currentTab === 'images' ? '+上传图片' : '+上传姿势'
@@ -236,6 +240,45 @@ const handleDeleteAsset = (index: number) => {
     poseAssets.value.splice(index, 1)
     // 保存所有资产到 localStorage，保持当前顺序
     saveAssetsToLocalStorage('poseAssets', poseAssets.value)
+  }
+}
+
+// 处理拖拽放下
+const handleDrop = (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (event.dataTransfer) {
+    try {
+      // 尝试解析拖拽数据
+      const dragData = JSON.parse(event.dataTransfer.getData('image'))
+      if (dragData && dragData.url) {
+        if (currentTab.value === 'images') {
+          const newAsset: Asset = {
+            id: Date.now(),
+            name: `dragged-image-${Date.now()}`,
+            type: 'image',
+            url: dragData.url,
+            isUserUploaded: true,
+          }
+          imageAssets.value.unshift(newAsset)
+          saveAssetsToLocalStorage('imageAssets', imageAssets.value)
+        } else if (currentTab.value === 'poses') {
+          const newPose: Pose = {
+            id: Date.now(),
+            name: `dragged-pose-${Date.now()}`,
+            type: 'pose',
+            poseId: `custom-${Date.now()}`,
+            thumbnail: dragData.url,
+            isUserUploaded: true,
+          }
+          poseAssets.value.unshift(newPose)
+          saveAssetsToLocalStorage('poseAssets', poseAssets.value)
+        }
+      }
+    } catch (error) {
+      console.error('解析拖拽数据失败:', error)
+    }
   }
 }
 </script>
