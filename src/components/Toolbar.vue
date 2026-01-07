@@ -29,11 +29,19 @@
       {{ editMode ? '编辑' : '浏览' }}
     </el-button>
     <el-button type="danger" @click="handleClearCanvas"> 清空画布 </el-button>
+    <el-button
+      :icon="isCanvasExpanded ? ArrowUp : ArrowDown"
+      size="small"
+      @click="handleToggleCanvas"
+    >
+      {{ isCanvasExpanded ? '收起' : '展开' }}
+    </el-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 
 // 组件名称：CanvasToolbar（避免单词组件名警告）
 
@@ -53,10 +61,20 @@ const emit = defineEmits<{
   'tool-change': [tool: 'text' | 'rect' | 'number' | null]
   'edit-mode-change': [editMode: boolean]
   'clear-canvas': []
+  'toggle-canvas': []
 }>()
 
 // 工具栏引用
 const toolbarRef = ref<HTMLElement | null>(null)
+
+// 画布展开状态
+const isCanvasExpanded = ref(true)
+
+// 处理画布收起/展开
+const handleToggleCanvas = () => {
+  isCanvasExpanded.value = !isCanvasExpanded.value
+  emit('toggle-canvas')
+}
 
 // 处理工具切换
 const handleToolChange = (tool: 'text' | 'rect' | 'number') => {

@@ -4,7 +4,10 @@
     <AssetList :current-tab="currentAssetTab" @tab-change="(tab) => (currentAssetTab = tab)" />
 
     <!-- 中部：工具栏 + 画布 + 属性面板 -->
-    <div class="flex flex-col border-b border-gray-300" style="height: 600px">
+    <div
+      class="flex flex-col border-b border-gray-300"
+      :style="{ height: isCanvasExpanded ? '600px' : '48px' }"
+    >
       <!-- 工具栏 -->
       <Toolbar
         ref="toolbarRef"
@@ -16,10 +19,11 @@
         @tool-change="(tool) => (activeTool = tool)"
         @toggle-edit-mode="() => (editMode = !editMode)"
         @clear-canvas="clearCanvas"
+        @toggle-canvas="handleToggleCanvas"
       />
 
       <!-- 画布和属性面板 -->
-      <div class="flex flex-1 overflow-hidden bg-gray-50">
+      <div v-if="isCanvasExpanded" class="flex flex-1 overflow-hidden bg-gray-50">
         <!-- 画布 -->
         <div class="flex-1 border-r border-gray-300 bg-white">
           <Canvas
@@ -201,6 +205,9 @@ const resultList = ref<string[]>([])
 // 工具栏引用
 const toolbarRef = ref<{ toolbarRef: HTMLElement | null } | null>(null)
 
+// 画布展开状态
+const isCanvasExpanded = ref(true)
+
 // 资产库标签页配置
 const assetTabs = ref<{ label: string; value: 'images' | 'poses' }[]>([
   { label: '图片资源', value: 'images' },
@@ -209,6 +216,11 @@ const assetTabs = ref<{ label: string; value: 'images' | 'poses' }[]>([
 
 // 当前选中的标签页
 const currentAssetTab = ref<'images' | 'poses'>('images')
+
+// 处理画布收起/展开
+const handleToggleCanvas = () => {
+  isCanvasExpanded.value = !isCanvasExpanded.value
+}
 
 // 组件挂载时添加全局事件监听器
 onMounted(() => {

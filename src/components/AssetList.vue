@@ -23,18 +23,18 @@
       <!-- 展开收起按钮和显示删除按钮 -->
       <div class="flex gap-2">
         <el-button
-          :icon="isExpanded ? ArrowUp : ArrowDown"
-          size="small"
-          @click="isExpanded = !isExpanded"
-        >
-          {{ isExpanded ? '收起' : '展开' }}
-        </el-button>
-        <el-button
           :icon="showDeleteButtons ? Hide : View"
           size="small"
           @click="showDeleteButtons = !showDeleteButtons"
         >
           {{ showDeleteButtons ? '隐藏删除' : '显示删除' }}
+        </el-button>
+        <el-button
+          :icon="isExpanded ? ArrowUp : ArrowDown"
+          size="small"
+          @click="isExpanded = !isExpanded"
+        >
+          {{ isExpanded ? '收起' : '展开' }}
         </el-button>
       </div>
     </div>
