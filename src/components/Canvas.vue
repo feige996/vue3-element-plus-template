@@ -118,7 +118,7 @@
 // 组件名称：CanvasContainer（避免单词组件名警告）
 import { ref } from 'vue'
 import CanvasElement from './CanvasElement.vue'
-import type { CanvasElement as CanvasElementType } from '../typing'
+import type { CanvasElement as CanvasElementType, ToolType } from '../typing'
 
 // 资产数据类型定义
 interface Asset {
@@ -144,7 +144,7 @@ type CombinedAsset = Asset | Pose
 interface Props {
   canvasElements: CanvasElementType[]
   selectedElementId: string | null
-  activeTool?: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
+  activeTool?: ToolType | null
   editMode?: boolean
   currentNumber?: number
   colorList?: string[]

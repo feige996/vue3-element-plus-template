@@ -142,14 +142,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import HumanFigure from './HumanFigure.vue'
-import type { CanvasElement as CanvasElementType } from '../typing'
+import type { CanvasElement as CanvasElementType, ToolType } from '../typing'
 
 // Props 定义
 interface Props {
   element: CanvasElementType
   isSelected?: boolean
   editMode?: boolean
-  activeTool?: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
+  activeTool?: ToolType | null
 }
 
 const props = withDefaults(defineProps<Props>(), {

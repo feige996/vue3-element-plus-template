@@ -83,12 +83,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import type { ToolType } from '../typing'
 
 // 组件名称：CanvasToolbar（避免单词组件名警告）
 
 // Props 定义
 interface Props {
-  activeTool?: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
+  activeTool?: ToolType | null
   editMode?: boolean
   isScreenshotLoading?: boolean
 }
@@ -99,9 +100,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 // Emits 定义
 const emit = defineEmits<{
-  'tool-change': [
-    tool: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null,
-  ]
+  'tool-change': [tool: ToolType | null]
   'edit-mode-change': [editMode: boolean]
   'clear-canvas': []
   'toggle-canvas': []
@@ -123,9 +122,7 @@ const handleToggleCanvas = () => {
 }
 
 // 处理工具切换
-const handleToolChange = (
-  tool: 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line',
-) => {
+const handleToolChange = (tool: Exclude<ToolType, null>) => {
   const newTool = props.activeTool === tool ? null : tool
   emit('tool-change', newTool)
 }

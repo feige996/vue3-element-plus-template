@@ -96,7 +96,7 @@ import PropertyPanel from './components/PropertyPanel.vue'
 import type { UploadFile } from 'element-plus'
 import { uploadFile } from './utils/upload'
 import { generateImage, getTaskStatus, TaskStatusE } from './utils/aigc'
-import type { CombinedAsset, CanvasElement } from './typing'
+import type { CombinedAsset, CanvasElement, ToolType } from './typing'
 
 // 画布元素列表
 const canvasElements = ref<CanvasElement[]>([])
@@ -112,9 +112,7 @@ const MAX_HISTORY = 50
 const selectedElementId = ref<string | null>(null)
 
 // 活跃工具
-const activeTool = ref<
-  'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line' | null
->(null)
+const activeTool = ref<ToolType | null>(null)
 
 // 编辑模式
 const editMode = ref(true)

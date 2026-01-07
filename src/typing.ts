@@ -20,10 +20,13 @@ export interface Pose {
 // 合并资产类型
 export type CombinedAsset = Asset | Pose
 
+// 工具类型
+export type ToolType = 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line'
+
 // 画布元素数据类型定义
 export interface CanvasElement {
   id: string
-  type: 'image' | 'text' | 'rect' | 'dashed' | 'number' | 'human' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line'
+  type: 'image' | 'dashed' | 'human' | ToolType
   left: number
   top: number
   width?: number
