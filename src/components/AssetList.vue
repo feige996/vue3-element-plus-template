@@ -71,9 +71,6 @@
             <CircleClose class="w-4 h-4" />
           </div> -->
         </div>
-        <span class="text-xs text-gray-500 mt-1">{{
-          currentTab === 'images' ? `图片 ${index + 1}` : `姿势 ${index + 1}`
-        }}</span>
       </div>
     </div>
   </div>
