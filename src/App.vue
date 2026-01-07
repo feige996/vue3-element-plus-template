@@ -219,6 +219,16 @@ onUnmounted(() => {
 
 // 键盘事件处理
 const handleKeyDown = (event: KeyboardEvent) => {
+  // 检查当前是否有输入元素处于焦点状态
+  const activeElement = document.activeElement
+  const isInputFocused =
+    activeElement instanceof HTMLInputElement ||
+    activeElement instanceof HTMLTextAreaElement ||
+    (activeElement instanceof HTMLElement && activeElement.isContentEditable)
+
+  // 如果有输入元素处于焦点状态，不执行删除元素的操作
+  if (isInputFocused) return
+
   if ((event.key === 'Delete' || event.key === 'Backspace') && selectedElementId.value) {
     deleteElement()
   }
