@@ -145,7 +145,7 @@ const emit = defineEmits<{
 
 // 资产库标签页配置
 const assetTabs = ref<{ label: string; value: 'images' | 'poses' }[]>([
-  { label: '图片资源', value: 'images' },
+  // { label: '图片资源', value: 'images' },
   // { label: '人物姿势', value: 'poses' },
 ])
 
