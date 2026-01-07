@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1 bg-gray-200 p-4 overflow-auto h-full box-border">
+  <div class="flex-1 bg-gray-200 p-3 overflow-auto h-full box-border">
     <div
       ref="canvasRef"
       class="w-full h-full bg-white border border-gray-300 relative"
