@@ -171,27 +171,15 @@
         xmlns="http://www.w3.org/2000/svg"
         width="18"
         height="18"
-        viewBox="0 0 24 24"
+        viewBox="0 0 18 18"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="1.5"
         stroke-linecap="round"
         stroke-linejoin="round"
       >
         <title>数字标</title>
-        <g transform="translate(10, 10)">
-          <circle cx="0" cy="0" r="4" fill="currentColor" stroke="none"></circle>
-          <text
-            x="0"
-            y="1"
-            text-anchor="middle"
-            dominant-baseline="middle"
-            font-size="4"
-            fill="white"
-          >
-            1
-          </text>
-        </g>
+        <text x="9" y="10" text-anchor="middle" dominant-baseline="middle" font-size="12">①</text>
       </svg>
     </div>
     <div
