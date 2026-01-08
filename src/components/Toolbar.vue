@@ -4,70 +4,246 @@
     class="h-12 bg-white border-b border-gray-200 flex items-center px-2 space-x-2"
   >
     <!-- 第一组：基础绘制工具 -->
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'brush' }"
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'brush',
+        'hover:bg-gray-100': activeTool !== 'brush',
+      }"
       @click="handleToolChange('brush')"
+      title="画笔"
     >
-      画笔
-    </el-button>
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'line' }"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.83 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.83L17 11l4.37-4.37a2 2 0 0 0 0-2.83l-1.26-1.27a2 2 0 0 0-2.83 0z"
+        ></path>
+        <circle cx="11" cy="11" r="2"></circle>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'line',
+        'hover:bg-gray-100': activeTool !== 'line',
+      }"
       @click="handleToolChange('line')"
+      title="直线"
     >
-      直线
-    </el-button>
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'arrow' }"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="20" y1="10" x2="4" y2="10"></line>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'arrow',
+        'hover:bg-gray-100': activeTool !== 'arrow',
+      }"
       @click="handleToolChange('arrow')"
+      title="箭头"
     >
-      箭头
-    </el-button>
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'circle' }"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'circle',
+        'hover:bg-gray-100': activeTool !== 'circle',
+      }"
       @click="handleToolChange('circle')"
+      title="圆形框"
     >
-      圆形框
-    </el-button>
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'rect' }"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'rect',
+        'hover:bg-gray-100': activeTool !== 'rect',
+      }"
       @click="handleToolChange('rect')"
+      title="矩形框"
     >
-      矩形框
-    </el-button>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      </svg>
+    </div>
 
     <!-- 第二组：编辑修改工具 -->
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'text' }"
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'text',
+        'hover:bg-gray-100': activeTool !== 'text',
+      }"
       @click="handleToolChange('text')"
+      title="文本框"
     >
-      文本框
-    </el-button>
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'number' }"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'number',
+        'hover:bg-gray-100': activeTool !== 'number',
+      }"
       @click="handleToolChange('number')"
+      title="数字标"
     >
-      数字标
-    </el-button>
-    <el-button
-      type="primary"
-      :class="{ 'bg-green-600 hover:bg-green-600': activeTool === 'eraser' }"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" y1="2" x2="12" y2="22"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
+      :class="{
+        'bg-green-600 text-white': activeTool === 'eraser',
+        'hover:bg-gray-100': activeTool !== 'eraser',
+      }"
       @click="handleToolChange('eraser')"
+      title="擦除"
     >
-      擦除
-    </el-button>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+      </svg>
+    </div>
 
     <div class="w-px h-6 bg-gray-300 mx-2"></div>
 
     <!-- 第三组：操作管理工具 -->
-    <el-button type="info" @click="handleUndo"> 撤销 </el-button>
-    <el-button type="info" @click="handleRedo"> 重做 </el-button>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200 hover:bg-gray-100"
+      @click="handleUndo"
+      title="撤销"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M3 7v6h6"></path>
+        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+      </svg>
+    </div>
+    <div
+      class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200 hover:bg-gray-100"
+      @click="handleRedo"
+      title="重做"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 7v6h-6"></path>
+        <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
+      </svg>
+    </div>
 
     <div class="w-px h-6 bg-gray-300 mx-2"></div>
 
@@ -127,11 +303,6 @@ const handleToggleCanvas = () => {
 const handleToolChange = (tool: Exclude<ToolType, null>) => {
   const newTool = props.activeTool === tool ? null : tool
   emit('tool-change', newTool)
-}
-
-// 处理编辑模式切换
-const handleEditModeChange = () => {
-  emit('edit-mode-change', !props.editMode)
 }
 
 // 处理清空画布
