@@ -21,7 +21,7 @@ export interface Pose {
 export type CombinedAsset = Asset | Pose
 
 // 工具类型
-export type ToolType = 'text' | 'rect' | 'number' | 'brush' | 'eraser' | 'arrow' | 'circle' | 'line'
+export type ToolType = 'text' | 'rect' | 'number' | 'curve' | 'eraser' | 'arrow' | 'circle' | 'line'
 
 // 画布元素数据类型定义
 export interface CanvasElement {
@@ -45,7 +45,7 @@ export interface CanvasElement {
   figureType?: string
   pose?: string
   zIndex?: number
-  // 画笔相关属性
+  // 曲线相关属性
   points?: { x: number; y: number }[]
   strokeWidth?: number
   // 箭头相关属性

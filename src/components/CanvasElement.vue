@@ -71,9 +71,9 @@
       @jointMousedown="handleJointMousedown"
     />
 
-    <!-- 画笔元素 -->
+    <!-- 曲线元素 -->
     <svg
-      v-else-if="element.type === 'brush'"
+      v-else-if="element.type === 'curve'"
       class="w-full h-full"
       :style="{
         left: '0',

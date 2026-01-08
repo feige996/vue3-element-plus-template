@@ -42,14 +42,14 @@
         }"
       ></div>
 
-      <!-- 临时绘制的画笔路径 -->
+      <!-- 临时绘制的曲线 -->
       <svg
-        v-if="isDrawingBrush && brushPoints.length > 1"
+        v-if="isDrawingCurve && curvePoints.length > 1"
         class="absolute pointer-events-none"
         :style="{ left: '0', top: '0', width: '100%', height: '100%' }"
       >
         <polyline
-          :points="brushPoints.map((p) => `${p.x},${p.y}`).join(' ')"
+          :points="curvePoints.map((p) => `${p.x},${p.y}`).join(' ')"
           fill="none"
           :stroke="colorList[currentColorIndex]"
           stroke-width="3"
@@ -191,9 +191,9 @@ const resizeStartSize = ref({ width: 0, height: 0 })
 const drawStartPos = ref({ x: 0, y: 0 })
 const tempRect = ref<{ left: number; top: number; width: number; height: number } | null>(null)
 
-// 画笔绘制状态
-const isDrawingBrush = ref(false)
-const brushPoints = ref<{ x: number; y: number }[]>([])
+// 曲线绘制状态
+const isDrawingCurve = ref(false)
+const curvePoints = ref<{ x: number; y: number }[]>([])
 
 // 箭头绘制状态
 const isDrawingArrow = ref(false)
@@ -251,10 +251,10 @@ const onCanvasMouseDown = (event: MouseEvent) => {
     case 'number':
       addNumberElement(left, top)
       break
-    case 'brush':
-      // 开始绘制画笔
-      isDrawingBrush.value = true
-      brushPoints.value = [{ x: left, y: top }]
+    case 'curve':
+      // 开始绘制曲线
+      isDrawingCurve.value = true
+      curvePoints.value = [{ x: left, y: top }]
       break
     case 'arrow':
       // 开始绘制箭头
@@ -328,13 +328,13 @@ const onCanvasMouseMove = (event: MouseEvent) => {
     }
   }
 
-  // 处理画笔绘制
-  if (isDrawingBrush.value && canvasRef.value) {
+  // 处理曲线绘制
+  if (isDrawingCurve.value && canvasRef.value) {
     const canvas = canvasRef.value
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
-    brushPoints.value.push({ x, y })
+    curvePoints.value.push({ x, y })
   }
 
   // 处理箭头绘制
@@ -421,14 +421,14 @@ const onCanvasMouseUp = (event: MouseEvent) => {
     tempRect.value = null
   }
 
-  // 结束画笔绘制
-  if (isDrawingBrush.value && brushPoints.value.length > 1) {
-    addBrushElement(brushPoints.value)
-    isDrawingBrush.value = false
-    brushPoints.value = []
-  } else if (isDrawingBrush.value) {
-    isDrawingBrush.value = false
-    brushPoints.value = []
+  // 结束曲线绘制
+  if (isDrawingCurve.value && curvePoints.value.length > 1) {
+    addCurveElement(curvePoints.value)
+    isDrawingCurve.value = false
+    curvePoints.value = []
+  } else if (isDrawingCurve.value) {
+    isDrawingCurve.value = false
+    curvePoints.value = []
   }
 
   // 结束箭头绘制
@@ -756,8 +756,8 @@ const getArrowHeadPoints = (start: { x: number; y: number }, end: { x: number; y
   return `${end.x},${end.y} ${x1},${y1} ${x2},${y2}`
 }
 
-// 添加画笔元素
-const addBrushElement = (points: { x: number; y: number }[]) => {
+// 添加曲线元素
+const addCurveElement = (points: { x: number; y: number }[]) => {
   if (points.length === 0) return
 
   const minX = Math.min(...points.map((p) => p.x))
@@ -769,7 +769,7 @@ const addBrushElement = (points: { x: number; y: number }[]) => {
   const height = maxY - minY
 
   emit('element-add', {
-    type: 'brush',
+    type: 'curve',
     left: minX,
     top: minY,
     width: width || 1,

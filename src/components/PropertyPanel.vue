@@ -63,7 +63,7 @@
           </div>
         </div>
 
-        <div v-else-if="localElement.type === 'brush'">
+        <div v-else-if="localElement.type === 'curve'">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
             <select

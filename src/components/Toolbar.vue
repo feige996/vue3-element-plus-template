@@ -7,11 +7,11 @@
     <div
       class="tool-icon flex items-center justify-center w-8 h-8 rounded-md cursor-pointer transition-all duration-200"
       :class="{
-        'bg-green-600 text-white': activeTool === 'brush',
-        'hover:bg-gray-100': activeTool !== 'brush',
+        'bg-green-600 text-white': activeTool === 'curve',
+        'hover:bg-gray-100': activeTool !== 'curve',
       }"
-      @click="handleToolChange('brush')"
-      title="画笔"
+      @click="handleToolChange('curve')"
+      title="曲线"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -24,10 +24,7 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <path
-          d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.83 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.83L17 11l4.37-4.37a2 2 0 0 0 0-2.83l-1.26-1.27a2 2 0 0 0-2.83 0z"
-        ></path>
-        <circle cx="11" cy="11" r="2"></circle>
+        <path d="M4 12 C 8 6, 16 18, 20 12"></path>
       </svg>
     </div>
     <div
