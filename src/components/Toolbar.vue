@@ -24,7 +24,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>画笔</title>
         <path
           d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.83 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.83L17 11l4.37-4.37a2 2 0 0 0 0-2.83l-1.26-1.27a2 2 0 0 0-2.83 0z"
         ></path>
@@ -51,7 +50,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>直线</title>
         <line x1="20" y1="10" x2="4" y2="10"></line>
       </svg>
     </div>
@@ -75,7 +73,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>箭头</title>
         <line x1="5" y1="12" x2="19" y2="12"></line>
         <polyline points="12 5 19 12 12 19"></polyline>
       </svg>
@@ -100,7 +97,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>圆形框</title>
         <circle cx="12" cy="12" r="10"></circle>
       </svg>
     </div>
@@ -124,7 +120,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>矩形框</title>
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
       </svg>
     </div>
@@ -150,7 +145,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>文本框</title>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -178,7 +172,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>数字标</title>
         <text x="9" y="10" text-anchor="middle" dominant-baseline="middle" font-size="12">①</text>
       </svg>
     </div>
@@ -202,7 +195,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>擦除</title>
         <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"></path>
         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
       </svg>
@@ -227,7 +219,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>撤销</title>
         <path d="M3 7v6h6"></path>
         <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
       </svg>
@@ -248,7 +239,6 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <title>重做</title>
         <path d="M21 7v6h-6"></path>
         <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
       </svg>
